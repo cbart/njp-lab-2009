@@ -19,20 +19,16 @@
   const int DEBUG_LEVEL = 0;
 #endif
 
-
-const size_t MAX_STR_LENGTH = 100;
-
-
-using namespace std;
-
-
 typedef unsigned long Integer;
 
 typedef string String;
 
 
+const size_t MAX_STR_LENGTH = 100;
+
+
 /**
-  cerr output description:
+  std::cerr output description:
   (II) information
   (EE) error
   (WW) warning
@@ -126,9 +122,10 @@ Integer& MapTel::getNextId()
 
 list<Integer>& MapTel::getFreeIdsList()
 {
-    /* The static object does not need to be allocated dynamically,
-     * because it is not dependent on any other `static` object
-     * and any other `static` object depends on `unallocated_ids`. */
+    /* The static object does not need to be allocated dynamically
+     * (aka via `new`), because it is not dependent on any other
+     * `static` object and any other `static` object depends
+     * on `unallocated_ids`. */
     static list<Integer> unallocated_ids = list<Integer>();
     return unallocated_ids;
 }
@@ -136,16 +133,16 @@ list<Integer>& MapTel::getFreeIdsList()
 MapTel::MapTel(Integer id) : id(id)
 {
     if(DEBUG_LEVEL > 1)
-        cerr << "(II) libmaptel -> creating maptel of id = "
-            << id << ".\n" << flush;
+        std::cerr << "(II) libmaptel -> creating maptel of id = "
+            << id << ".\n" << std::flush;
     tel_transforms = map<String, String>();
 }
 
 MapTel::MapTel(const MapTel& copy) : id(copy.getId())
 {
     if(DEBUG_LEVEL > 1)
-        cerr << "(II) libmaptel -> creating maptel of id = "
-            << id << " (copy).\n" << flush;
+        std::cerr << "(II) libmaptel -> creating maptel of id = "
+            << id << " (copy).\n" << std::flush;
     tel_transforms = map<String, String>(copy.tel_transforms);
 }
 
@@ -156,17 +153,17 @@ bool MapTel::isCorrect(const String& number)
         it ++)
         if(!(*it >= '0' && *it <= '9')) {
             if(DEBUG_LEVEL > 1)
-                cerr << "(EE) libmaptel -> checking if number <"
-                    << number << "> is correct... [NO].\n" << flush;
+                std::cerr << "(EE) libmaptel -> checking if number <"
+                    << number << "> is correct... [NO].\n" << std::flush;
             return false;
         }
     if(DEBUG_LEVEL > 1) {
-        cerr << "(II) libmaptel -> checking if number <"
+        std::cerr << "(II) libmaptel -> checking if number <"
             << number << "> is correct... ";
         if(number.size() > 0)
-            cerr << "[YES].\n" << flush;
+            std::cerr << "[YES].\n" << std::flush;
         else
-            cerr << "[NO].\n" << flush;
+            std::cerr << "[NO].\n" << std::flush;
     }
 
     return (number.size() > 0);
@@ -174,6 +171,10 @@ bool MapTel::isCorrect(const String& number)
 
 map<Integer, MapTel>& MapTel::getMap()
 {
+    /* The static object does not need to be allocated dynamically
+     * (aka via `new`), because it is not dependent on any other
+     * `static` object and any other `static` object depends
+     * on `maptels`. */
     static map<Integer, MapTel> maptels = map<Integer, MapTel>();
     return maptels;
 }
@@ -196,8 +197,8 @@ bool MapTel::exists(Integer id)
     map<Integer,MapTel>::iterator it = getMap().find(id);
     if(DEBUG_LEVEL > 1)
         if(it == getMap().end())
-            cerr << "(EE) libmaptel -> maptel of id: " << id
-                << " does not exist!\n" << flush;
+            std::cerr << "(EE) libmaptel -> maptel of id: "
+                << id << " does not exist!\n" << std::flush;
     return (it != getMap().end());
 }
 
@@ -206,8 +207,8 @@ MapTel& MapTel::getMapTel(Integer id)
     map<Integer,MapTel>::iterator it = getMap().find(id);
     if(DEBUG_LEVEL > 1)
         if(it == getMap().end())
-            cerr << "(EE) libmaptel -> maptel of id: " << id
-                << " does not exist!\n" << flush;
+            std::cerr << "(EE) libmaptel -> maptel of id: "
+                << id << " does not exist!\n" << std::flush;
     if(DEBUG_LEVEL > 0)
         assert(it != getMap().end());
     return it->second;
@@ -216,12 +217,13 @@ MapTel& MapTel::getMapTel(Integer id)
 MapTel& MapTel::createMapTel()
 {
     if(DEBUG_LEVEL > 1)
-        cerr << "(II) libmaptel -> creating new maptel:\n";
+        std::cerr << "(II) libmaptel -> creating new maptel:\n";
     map<Integer,MapTel>& maptels = getMap();
     Integer id = shiftNextId();
     maptels.insert(pair<Integer, MapTel>(id, MapTel(id)));
     if (DEBUG_LEVEL > 1)
-        cerr << "(II) libmaptel -> end creating new maptel.\n" << flush;
+        std::cerr << "(II) libmaptel -> end creating new maptel.\n"
+            << std::flush;
     return getMapTel(id);
 }
 
@@ -231,11 +233,11 @@ void MapTel::deleteMapTel(Integer id)
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1) {
             if(!map_exists)
-                cerr << "(EE) libmaptel -> trying to delete maptel " << id
-                    << " which does not exist.\n" << flush;
+                std::cerr << "(EE) libmaptel -> trying to delete maptel "
+                    << id << " which does not exist.\n" << std::flush;
             else
-                cerr << "(II) libmaptel -> deleting maptel of id = " << id
-                    << ".\n" << flush;
+                std::cerr << "(II) libmaptel -> deleting maptel of id = "
+                    << id << ".\n" << std::flush;
         }
         assert(map_exists);
     }
@@ -252,43 +254,43 @@ Integer MapTel::getId() const
 
 MapTel::~MapTel() {
     if(DEBUG_LEVEL > 0)
-        cerr << "(II) libmaptel -> destroying maptel of id="
-            << getId() << flush;
+        std::cerr << "(II) libmaptel -> destroying maptel of id="
+            << getId() << std::flush;
 }
 
 void MapTel::insert(const String& source, const String& destination)
 {
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1) {
-            cerr << "(II) libmaptel -> [id=" << getId() << "]insert(\""
+            std::cerr << "(II) libmaptel -> [id=" << getId() << "]insert(\""
                 << source << "\", \"" << destination << "\");\n";
         }
         bool source_correct = isCorrect(source);
         bool destin_correct = isCorrect(destination);
         if(DEBUG_LEVEL > 1) {
             if(source_correct && destin_correct)
-                cerr << "(II) libmaptel -> [id=" << getId()
+                std::cerr << "(II) libmaptel -> [id=" << getId()
                     << "]insert: given numbers are correct.\n";
             else
-                cerr << "(EE) libmaptel -> [id=" << getId()
+                std::cerr << "(EE) libmaptel -> [id=" << getId()
                     << "]insert: some of given numbers: \""
                     << source << "\", \"" << destination
                     << "\" were incorrect!\n";
-            cerr << flush;
+            std::cerr << std::flush;
         }
         assert(source_correct && destin_correct);
         if(DEBUG_LEVEL > 1) {
             map<String, String>::iterator it = tel_transforms.find(source);
             if(it == tel_transforms.end())
-                cerr << "(II) libmaptel -> [id=" << getId()
+                std::cerr << "(II) libmaptel -> [id=" << getId()
                     << "]insert: inserting new transform: "
                     << source << " -> " << destination << ".\n";
             else
-                cerr << "(II) libmaptel -> [id=" << getId()
+                std::cerr << "(II) libmaptel -> [id=" << getId()
                     << "]insert: changing transform to: "
                     << source << " -> " << destination << " (from: "
                     << source << " -> " << it->second << ").\n";
-            cerr << flush;
+            std::cerr << std::flush;
         }
     }
     tel_transforms[source] = destination;
@@ -298,30 +300,30 @@ void MapTel::erase(const String& source)
 {
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1)
-            cerr << "(II) libmaptel -> [id=" << getId() << "]erase(\""
+            std::cerr << "(II) libmaptel -> [id=" << getId() << "]erase(\""
                 << source << "\");\n";
         bool source_correct = isCorrect(source);
         if(DEBUG_LEVEL > 1) {
             if(source_correct)
-                cerr << "(II) libmaptel -> [id=" << getId()
+                std::cerr << "(II) libmaptel -> [id=" << getId()
                     << "]erase: given source is correct.\n";
             else
-                cerr << "(EE) libmaptel -> [id=" << getId()
+                std::cerr << "(EE) libmaptel -> [id=" << getId()
                     << "]erase: given source: \"" << source
                     << "\" is not correct!\n";
-            cerr << flush;
+            std::cerr << std::flush;
         }
         assert(source_correct);
         if(DEBUG_LEVEL > 1) {
             map<String, String>::iterator it = tel_transforms.find(source);
             if(it == tel_transforms.end())
-                cerr << "(WW) libmaptel -> [id=" << getId()
+                std::cerr << "(WW) libmaptel -> [id=" << getId()
                     << "]erase: source not found, doing nothing.\n";
             else
-                cerr << "(II) libmaptel -> [id=" << getId()
+                std::cerr << "(II) libmaptel -> [id=" << getId()
                     << "]erase: source found, erasing transformation: "
                     << source << " -> " << it->second << ".\n";
-            cerr << flush;
+            std::cerr << std::flush;
         }
     }
     tel_transforms.erase(source);
@@ -331,18 +333,18 @@ String MapTel::transform(const String& source) const
 {
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1)
-            cerr << "(II) libmaptel -> [id=" << getId() << "]transform(\""
+            std::cerr << "(II) libmaptel -> [id=" << getId() << "]transform(\""
                 << source << "\");\n";
         bool source_correct = isCorrect(source);
         if(DEBUG_LEVEL > 1) {
             if(source_correct)
-                cerr << "(II) libmaptel -> [id=" << getId()
+                std::cerr << "(II) libmaptel -> [id=" << getId()
                     << "]transform: given source is correct.\n";
             else
-                cerr << "(EE) libmaptel -> [id=" << getId()
+                std::cerr << "(EE) libmaptel -> [id=" << getId()
                     << "]transform: given source: \"" << source
                     << "\" is not correct!\n";
-            cerr << flush;
+            std::cerr << std::flush;
         }
         assert(source_correct);
     }
@@ -351,14 +353,14 @@ String MapTel::transform(const String& source) const
 
     if(DEBUG_LEVEL > 1) {
         if(it == tel_transforms.end())
-            cerr << "(II) libmaptel -> [id=" << getId()
+            std::cerr << "(II) libmaptel -> [id=" << getId()
                 << "]transform: source not found, returning id transformation: "
                 << source << " -> " << source << ".\n";
         else
-            cerr << "(II) libmaptel -> [id=" << getId()
+            std::cerr << "(II) libmaptel -> [id=" << getId()
                 << "]transform: source found, returning transformation: "
                 << source << " -> " << it->second << ".\n";
-        cerr << flush;
+        std::cerr << std::flush;
     }
 
     if(it != tel_transforms.end())
@@ -370,18 +372,18 @@ bool MapTel::isCyclic(const String& source) const
 {
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1)
-            cerr << "(II) libmaptel -> [id=" << getId() << "]isCyclic(\""
+            std::cerr << "(II) libmaptel -> [id=" << getId() << "]isCyclic(\""
                 << source << "\");\n";
         bool source_correct = isCorrect(source);
         if(DEBUG_LEVEL > 1) {
             if(source_correct)
-                cerr << "(II) libmaptel -> [id=" << getId()
+                std::cerr << "(II) libmaptel -> [id=" << getId()
                     << "]isCyclic: given source is correct.\n";
             else
-                cerr << "(EE) libmaptel -> [id=" << getId()
+                std::cerr << "(EE) libmaptel -> [id=" << getId()
                     << "]isCyclic: given source: \"" << source
                     << "\" is not correct!\n";
-            cerr << flush;
+            std::cerr << std::flush;
         }
         assert(source_correct);
     }
@@ -390,31 +392,32 @@ bool MapTel::isCyclic(const String& source) const
     set<String>::iterator seen_it;
     map<String,String>::const_iterator maptel_it;
     if(DEBUG_LEVEL > 1)
-        cerr << "(II) libmaptel -> isCyclic: checking cycle from source: "
+        std::cerr << "(II) libmaptel -> isCyclic: checking cycle from source: "
             << source << ";\n";
     while(true) {
         seen_it = seen.find(current_source);
         if(seen_it != seen.end()) {
             if(DEBUG_LEVEL > 1)
-                cerr << "(II) libmaptel -> isCyclic: element: "
+                std::cerr << "(II) libmaptel -> isCyclic: element: "
                     << current_source << " was already seen;\n"
-                    << "(II) libmaptel -> isCyclic: cycle found.\n" << flush;
+                    << "(II) libmaptel -> isCyclic: cycle found.\n"
+                    << std::flush;
             return true;
         }
         seen.insert(current_source);
         maptel_it = tel_transforms.find(current_source);
         if(maptel_it != tel_transforms.end()) {
             if(DEBUG_LEVEL > 1)
-                cerr << "(II) libmaptel -> isCyclic: transform: "
+                std::cerr << "(II) libmaptel -> isCyclic: transform: "
                     << current_source << " -> " << maptel_it->second << ";\n";
             current_source = (*maptel_it).second;
         }
         else {
             if(DEBUG_LEVEL > 1)
-                cerr << "(II) libmaptel -> isCyclic: transform: "
+                std::cerr << "(II) libmaptel -> isCyclic: transform: "
                     << current_source << " -> ... (none found);\n"
                     << "(II) libmaptel -> isCyclic: cycle NOT found.\n"
-                    << flush;
+                    << std::flush;
             return false;
         }
     }
@@ -424,18 +427,18 @@ String MapTel::transformEx(const String& source) const
 {
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1)
-            cerr << "(II) libmaptel -> [id=" << getId() << "]transformEx(\""
-                << source << "\");\n";
+            std::cerr << "(II) libmaptel -> [id=" << getId()
+                << "]transformEx(\"" << source << "\");\n";
         bool source_correct = isCorrect(source);
         if(DEBUG_LEVEL > 1) {
             if(source_correct)
-                cerr << "(II) libmaptel -> [id=" << getId()
+                std::cerr << "(II) libmaptel -> [id=" << getId()
                     << "]transformEx: given source is correct.\n";
             else
-                cerr << "(EE) libmaptel -> [id=" << getId()
+                std::cerr << "(EE) libmaptel -> [id=" << getId()
                     << "]transformEx: given source: \"" << source
                     << "\" is not correct!\n";
-            cerr << flush;
+            std::cerr << std::flush;
         }
         assert(source_correct);
     }
@@ -444,17 +447,17 @@ String MapTel::transformEx(const String& source) const
     set<String>::iterator seen_it;
     map<String,String>::const_iterator maptel_it;
     if(DEBUG_LEVEL > 1)
-        cerr << "(II) libmaptel -> transformEx: checking path from: "
+        std::cerr << "(II) libmaptel -> transformEx: checking path from: "
             << source << ";\n";
     while(true) {
         seen_it = seen.find(current_source);
         if(DEBUG_LEVEL > 0) {
             if(DEBUG_LEVEL > 1)
                 if(seen_it != seen.end())
-                    cerr << "(EE) libmaptel -> transformEx: element: "
+                    std::cerr << "(EE) libmaptel -> transformEx: element: "
                         << current_source << " was already seen;\n"
                         << "(EE) libmaptel -> transformEx: cycle found!\n"
-                        << flush;
+                        << std::flush;
             assert(seen_it == seen.end());
         }
         if(seen_it != seen.end())
@@ -463,18 +466,18 @@ String MapTel::transformEx(const String& source) const
         maptel_it = tel_transforms.find(current_source);
         if(maptel_it != tel_transforms.end()) {
             if(DEBUG_LEVEL > 1)
-                cerr << "(II) libmaptel -> transformEx: transform: "
+                std::cerr << "(II) libmaptel -> transformEx: transform: "
                     << current_source << " -> " << maptel_it->second << ";\n";
             current_source = (*maptel_it).second;
         }
         else {
             if(DEBUG_LEVEL > 1)
-                cerr << "(II) libmaptel -> transformEx: transform: "
+                std::cerr << "(II) libmaptel -> transformEx: transform: "
                     << current_source << " -> ... (none found);\n"
                     << "(II) libmaptel -> transformEx: "
                     "final destination found: "
                     << current_source << "\n"
-                    << flush;
+                    << std::flush;
             break;
         }
     }
@@ -497,18 +500,18 @@ void maptel_insert
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1)
             if(tel_src == NULL)
-                cerr << "(EE) libmaptel -> insert: tel_src is NULL!\n"
-                    << flush;
+                std::cerr << "(EE) libmaptel -> insert: tel_src is NULL!\n"
+                    << std::flush;
         assert(tel_src != NULL);
         if(DEBUG_LEVEL > 1)
             if(tel_dst == NULL)
-                cerr << "(EE) libmapter -> insert: tel_dst is NULL!\n"
-                    << flush;
+                std::cerr << "(EE) libmapter -> insert: tel_dst is NULL!\n"
+                    << std::flush;
         assert(tel_dst != NULL);
         if(DEBUG_LEVEL > 1)
             if(!MapTel::exists(id))
-                cerr << "(EE) libmaptel -> insert: maptel of id = " << id
-                    << " does not exist!\n" << flush;
+                std::cerr << "(EE) libmaptel -> insert: maptel of id = "
+                    << id << " does not exist!\n" << std::flush;
         assert(MapTel::exists(id));
     }
     String src = String(tel_src);
@@ -521,13 +524,13 @@ void maptel_erase(unsigned long id, const char *tel_src)
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1)
             if(tel_src == NULL)
-                cerr << "(EE) libmaptel -> erase: tel_src is NULL!\n"
-                    << flush;
+                std::cerr << "(EE) libmaptel -> erase: tel_src is NULL!\n"
+                    << std::flush;
         assert(tel_src != NULL);
         if(DEBUG_LEVEL > 1)
             if(!MapTel::exists(id))
-                cerr << "(EE) libmaptel -> erase: maptel of id = " << id
-                    << " does not exist!\n" << flush;
+                std::cerr << "(EE) libmaptel -> erase: maptel of id = "
+                    << id << " does not exist!\n" << std::flush;
         assert(MapTel::exists(id));
     }
     String src = String(tel_src);
@@ -540,22 +543,22 @@ void maptel_transform
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1)
             if(tel_src == NULL)
-                cerr << "(EE) libmaptel -> transform: tel_src is NULL!\n"
-                    << flush;
+                std::cerr << "(EE) libmaptel -> transform: tel_src is NULL!\n"
+                    << std::flush;
         assert(tel_src != NULL);
         if(DEBUG_LEVEL > 1)
             if(tel_dst == NULL)
-                cerr << "(EE) libmaptel -> transform: tel_dst is NULL!\n"
-                    << flush;
+                std::cerr << "(EE) libmaptel -> transform: tel_dst is NULL!\n"
+                    << std::flush;
         if(DEBUG_LEVEL > 1)
             if(len < 1)
-                cerr << "(EE) libmaptel -> transform: len must be >= 1!\n"
-                    << flush;
+                std::cerr << "(EE) libmaptel -> transform: len must be >= 1!\n"
+                    << std::flush;
         assert(len >= 1);
         if(DEBUG_LEVEL > 1)
             if(!MapTel::exists(id))
-                cerr << "(EE) libmaptel -> transform: maptel of id = " << id
-                    << " does not exist!\n";
+                std::cerr << "(EE) libmaptel -> transform: maptel of id = "
+                    << id << " does not exist!\n";
         assert(MapTel::exists(id));
     }
     const String src = String(tel_src);
@@ -563,16 +566,16 @@ void maptel_transform
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1) {
             if(len < dst.size() + 1)
-                cerr << "(EE) libmaptel -> transform: amount of given memory ("
-                    << sizeof(char) * len
+                std::cerr << "(EE) libmaptel -> transform: amount "
+                    "of given memory (" << sizeof(char) * len
                     << "B) to small for writing returned dest: "
                     "#\"" << dst << "\\0\" = " << dst.size() + 1 <<
-                    " > " << len << ".\n" << flush;
+                    " > " << len << ".\n" << std::flush;
         else
-            cerr << "(EE) libmaptel -> transform: amount of given memory ("
-                    << sizeof(char) * len << "B) correct: "
-                    "#\"" << dst << "\\0\" = " << dst.size() + 1
-                    << " <= " << len << ".\n" << flush;
+            std::cerr << "(EE) libmaptel -> transform: amount "
+                "of given memory (" << sizeof(char) * len << "B) correct: "
+                "#\"" << dst << "\\0\" = " << dst.size() + 1
+                << " <= " << len << ".\n" << std::flush;
         }
         assert(dst.size() + 1 <= len);
     }
@@ -586,13 +589,13 @@ int maptel_is_cyclic(unsigned long id, const char *tel_src)
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1)
             if(tel_src == NULL)
-                cerr << "(EE) libmaptel -> isCyclic: tel_src is NULL!\n"
-                    << flush;
+                std::cerr << "(EE) libmaptel -> isCyclic: tel_src is NULL!\n"
+                    << std::flush;
         assert(tel_src != NULL);
         if(DEBUG_LEVEL > 1)
             if(!MapTel::exists(id))
-                cerr << "(EE) libmaptel -> isCyclic: maptel of id = " << id
-                    << " does not exist!\n";
+                std::cerr << "(EE) libmaptel -> isCyclic: maptel of id = "
+                    << id << " does not exist!\n";
         assert(MapTel::exists(id));
     }
     const String src = String(tel_src);
@@ -604,24 +607,24 @@ void maptel_transform_ex
 {
         if(DEBUG_LEVEL > 1)
             if(tel_src == NULL)
-                cerr << "(EE) libmaptel -> transformEx: tel_src is NULL!\n"
-                    << flush;
+                std::cerr << "(EE) libmaptel -> transformEx: tel_src is NULL!\n"
+                    << std::flush;
         assert(tel_src != NULL);
         id(DEBUG_LEVEL > 1)
             if(tel_dst == NULL)
-                cerr << "(EE) libmaptel -> transformEx: tel_dst is NULL!\n"
-                    << flush;
+                std::cerr << "(EE) libmaptel -> transformEx: tel_dst is NULL!\n"
+                    << std::flush;
         assert(tel_dst != NULL);
         if(DEBUG_LEVEL > 1)
             if(len < 1)
-                cerr << "(EE) libmaptel -> transformEx: len must be >= 1!\n"
-                    << flush;
+                std::cerr << "(EE) libmaptel -> transformEx: "
+                    "len must be >= 1!\n" << std::flush;
         assert(len >= 1);
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1)
             if(!MapTel::exists(id))
-                cerr << "(EE) libmaptel -> transformEx: maptel of id = " << id
-                    << " does not exist!\n";
+                std::cerr << "(EE) libmaptel -> transformEx: maptel of id = "
+                    << id << " does not exist!\n";
         assert(MapTel::exists(id));
     }
     const String src = String(tel_src);
@@ -629,16 +632,16 @@ void maptel_transform_ex
     if(DEBUG_LEVEL > 0) {
         if(DEBUG_LEVEL > 1) {
             if(len < dst.size() + 1)
-                cerr << "(EE) libmaptel -> transformEx: amount of "
+                std::cerr << "(EE) libmaptel -> transformEx: amount of "
                     "given memory (" << sizeof(char) * len << "B) to small "
                     "for writing returned dest: "
                     "#\"" << dst << "\\0\" = " << dst.size() + 1
-                    << " > " << len << ".\n" << flush;
+                    << " > " << len << ".\n" << std::flush;
         else
-            cerr << "(EE) libmaptel -> transformEx: amount of given memory ("
-                << sizeof(char) * len << "B) correct: "
-                << "#\"" << dst << "\\0\" = " << dst.size() + 1 << " <= " << len
-                << ".\n" << flush;
+            std::cerr << "(EE) libmaptel -> transformEx: amount "
+                "of given memory (" << sizeof(char) * len << "B) correct: "
+                << "#\"" << dst << "\\0\" = " << dst.size() + 1 << " <= "
+                << len << ".\n" << std::flush;
         }
         assert(dst.size() + 1 <= len);
     }
@@ -647,28 +650,3 @@ void maptel_transform_ex
     tel_dst[dst.size()] = '\0';
 }
 
-
-int main()
-{
-    Integer map1 = maptel_create();
-    Integer map2 = maptel_create();
-    maptel_delete(map1);
-    Integer map3 =  maptel_create();
-    map1 = maptel_create();
-    char* tel_dst = new char[100]();
-    maptel_insert(map1, "1234", "5678");
-    maptel_insert(map1, "1234", "5679");
-    maptel_transform(map2, "1234", tel_dst, 100);
-    maptel_insert(map1, "5679", "7777");
-    maptel_insert(map1, "7777", "1234");
-    assert(maptel_is_cyclic(map1, "7777"));
-    maptel_insert(map1, "5679", "8888");
-    assert(!maptel_is_cyclic(map1, "7777"));
-    maptel_erase(map1, "5679");
-    maptel_insert(map3, "1234", "2345");
-    maptel_insert(map3, "2345", "2345");
-    assert(maptel_is_cyclic(map3, "1234"));
-    maptel_erase(map3, "2345");
-    assert(!maptel_is_cyclic(map3, "1234"));
-    return 0;
-}
