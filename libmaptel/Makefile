@@ -1,4 +1,5 @@
 CXX = g++
+CC = gcc
 CFLAGS = -Wall
 
 debuglevel := 0
@@ -16,9 +17,6 @@ all: maptel.o
 
 maptel.o: maptel.cc maptel.h
 	${CXX} ${CFLAGS} -c maptel.cc -o maptel.o
-
-test: maptel.o
-	${CXX} ${CFLAGS} maptel.o -o maptel
 
 clean:
 	@rm -f maptel.o *~

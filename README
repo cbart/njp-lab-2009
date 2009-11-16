@@ -1,0 +1,14 @@
+Zadanie 1 (wyszukiwanie)
+    Nierozpoczęte
+    TODO: * rozpocząć...
+Zadanie 2 (libmaptel)
+    Katalog ./libmaptel
+    TODO: * wywalić ify z asercji -> użyć NDEBUG
+          * poprawić strumieniowanie komunikatów o błędach
+Zadanie 3 (ciągi kwaternionów)
+    TODO: * dokończyć quatsec.cc
+          * wywalić nadmiarowe ify
+          * poprawić strumieniowanie komunikatów o błędach
+Zadanie 4 (skojarzenia)
+    Nierozpoczęte
+    TODO: * rozpocząć...
