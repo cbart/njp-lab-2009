@@ -1,3 +1,7 @@
+/** Maptel.                              *
+ *  author: Cezary Bartoszuk             *
+ *  e-mail: cbart@students.mimuw.edu.pl  */
+
 #include <map>
 #include <set>
 #include <list>
@@ -5,7 +9,6 @@
 #include <cassert>
 
 #include <iostream>
-#include <sstream>
 
 #include <string>
 #include <cstring>
@@ -18,12 +21,8 @@ typedef std::string String;
 
 #ifdef MAPTEL_DEBUG_LEVEL
     const Integer DEBUG_LEVEL = MAPTEL_DEBUG_LEVEL;
-    #if MAPTEL_DEBUG_LEVEL == 0
-        #define NDEBUG
-    #endif
 #else
     const Integer DEBUG_LEVEL = 0;
-    #define NDEBUG
 #endif
 
 
@@ -56,6 +55,13 @@ class DebugStream {
         friend DebugStream& operator<<
             (DebugStream& ds, std::ostream& (*message_fun)(std::ostream&));
 };
+
+/* The basic idea of DebugStream class and functions:
+ * debug_info(), debug_warn() and debug_err()
+ * is to manage diagnostic messages in a friendly
+ * (for people reading the code) and flexible way.
+ * (We can change mininal debuglevel of all warnings
+ * just by changing two integer values if debug_warn()). */
 
 /** Name of current library displayed with every diagnostic info. */
 const String DebugStream::LIB_NAME = " libmaptel -> ";
@@ -171,9 +177,6 @@ class MapTel {
 
         /** gives transformation from given source (recursive); */
         String transformEx(const String& source) const;
-
-        /** returns stringstream with diagnostic information about maptel; */
-        //const stringstream& diag();
 
         /** the destructor; */
         virtual ~MapTel();
@@ -446,7 +449,6 @@ void maptel_insert
 {
     debug_info() << "[id=" << id << "]insert:\n"
         << std::flush;
-    /* Check if pointers are correct. */
     if(tel_src == NULL)
         debug_err() << "insert: tel_src is NULL!\n"
             << std::flush;
@@ -455,7 +457,6 @@ void maptel_insert
             << std::flush;
     assert(tel_src != NULL);
     assert(tel_dst != NULL);
-    /* Check if map exists. */
     if(!MapTel::exists(id))
         debug_err() << "insert: maptel of id = "
                     << id << " does not exist!\n"
@@ -490,7 +491,6 @@ void maptel_transform
 (unsigned long id, const char *tel_src, char *tel_dst, size_t len)
 {
     debug_info() << "[id=" << id << "]transform:\n" << std::flush;
-    /* Check pointers. */
     if(tel_src == NULL)
         debug_err() << "transform: tel_src is NULL!\n" << std::flush;
     if(tel_dst == NULL)
@@ -519,7 +519,6 @@ void maptel_transform
                 << "#\"" << dst << "\\0\" = " << dst.size() + 1
                 << " <= " << len << ".\n" << std::flush;
         assert(dst.size() + 1 <= len);
-        /* Writing. */
         for(size_t i = 0; i < dst.size(); i ++)
             tel_dst[i] = dst.at(i);
         tel_dst[dst.size()] = '\0';
@@ -529,7 +528,6 @@ void maptel_transform
 int maptel_is_cyclic(unsigned long id, const char *tel_src)
 {
     debug_info() << "[id=" << id << "]isCyclic:\n" << std::flush;
-    /* Check pointer. */
     if(tel_src == NULL)
         debug_err() << "isCyclic: tel_src is NULL!\n" << std::flush;
     assert(tel_src != NULL);
@@ -548,7 +546,6 @@ void maptel_transform_ex
 (unsigned long id, const char *tel_src, char *tel_dst, size_t len)
 {
     debug_info() << "[id=" << id << "]transform:\n" << std::flush;
-    /* Check pointers. */
     if(tel_src == NULL)
         debug_err() << "transform: tel_src is NULL!\n" << std::flush;
     if(tel_dst == NULL)

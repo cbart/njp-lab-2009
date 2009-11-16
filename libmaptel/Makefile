@@ -5,7 +5,7 @@ CFLAGS = -Wall
 debuglevel := 0
 
 ifeq (0,${debuglevel})
-	CFLAGS += -O2 -D MAPTEL_DEBUG_LEVEL=0
+	CFLAGS += -O2 -D MAPTEL_DEBUG_LEVEL=0 -D NDEBUG
 else ifeq (1,${debuglevel})
 	CFLAGS += -g -O0 -D MAPTEL_DEBUG_LEVEL=1
 else
@@ -22,6 +22,9 @@ clean:
 	@rm -f maptel.o *~
 
 mrproper: clean
+
+package:
+	tar -cvjf libmaptel.tar.bz2 maptel.cc maptel.h Makefile
 
 .PHONY: all clean mrproper
 
