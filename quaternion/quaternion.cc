@@ -4,29 +4,35 @@
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
+#include "./debug_tools.h"
 #include "./quaternion.h"
 
-/** DEBUGLEVEL:                      *
- *  0 - no debug;                    *
- *  1 - assertions ON;               *
- *  2 - 1 and messages for errors;   *
- *  3 - 2 and messages for warnings; *
- *  4 - 3 and messages for info;     *
- *  5 - paranoid level;              */
+/** DEBUGLEVEL:                         *
+ *  0 - no debug;                       *
+ *  1 - assertions ON;                  *
+ *  2 - 1 and info, warnings, errors;   */
+/** To manage turning assertions On/Off
+ *  you have to toggle -D NDEBUG option
+ *  while compiling. */
 
 #ifdef DEBUGLEVEL
-    const int DEBUG_LEVEL = DEBUGLEVEL;
+    const DebugLevel DEBUG_LEVEL = DEBUGLEVEL;
 #else
-    const int DEBUG_LEVEL = 0;
+    const DebugLevel DEBUG_LEVEL = 0;
 #endif
+
+const String DIAG_PROG_NAME = "Quaternion";
+
+const DebugLevel ERROR_DEBUG_LEVEL = 2;
+const DebugLevel WARNING_DEBUG_LEVEL = 2;
+const DebugLevel INFO_DEBUG_LEVEL = 2;
 
 /* Exception raised when division by zero is encountered. */
 DivideByZeroException::DivideByZeroException()
   : std::runtime_error("(EX) Attempted to divide by zero!\n")
 {
-    if(DEBUG_LEVEL > 1)
-        std::cerr << "(EX) DivideByZero::DivideByZero() thrown!\n"
-                  << std::flush;
+    logErr() << "DivideByZero::DivideByZero() thrown!\n"
+        << std::flush;
 }
 
 /* Inner `Quaternion`s value container constructor. */
@@ -36,10 +42,8 @@ Quaternion::QContainer::QContainer()
     c_val(0.),
     d_val(0.)
 {
-    if(DEBUG_LEVEL > 3)
-        std::cerr << "(II) "
-                     "Quaternion::QContainer::QContainer();\n"
-                  << std::flush;
+    logInfo() << "Quaternion::QContainer::QContainer();\n"
+        << std::flush;
 }
 
 /* Inner `Quaternion`s value container constructor. */
@@ -49,11 +53,8 @@ Quaternion::QContainer::QContainer(Real a, Real b, Real c, Real d)
     c_val(c),
     d_val(d)
 {
-    if(DEBUG_LEVEL > 3)
-        std::cerr << "(II) "
-                     "Quaternion::QContainer::QContainer"
-                     "(Real a, Real b, Real c, Real d);\n"
-                  << std::flush;
+    logInfo() << "Quaternion::QContainer::QContainer"
+        "(Real a, Real b, Real c, Real d);\n" << std::flush;
 }
 
 /* Inner `Quaternion`s value container copy constructor. */
@@ -63,28 +64,20 @@ Quaternion::QContainer::QContainer(const IQContainer& cnt)
     c_val(cnt.getC()),
     d_val(cnt.getD())
 {
-    if(DEBUG_LEVEL > 3)
-        std::cerr << "(II) "
-                     "Quaternion::QContainer::QContainer"
-                     "(const IQContainer& cnt);\n"
-                  << std::flush;
+    logInfo() << "Quaternion::QContainer::QContainer"
+        "(const IQContainer& cnt);\n" << std::flush;
 }
 
 /* `QContainer`s destructor. */
 Quaternion::QContainer::~QContainer()
 {
-    if(DEBUG_LEVEL > 3)
-        std::cerr << "(II) Quaternion::QContainer::~QContainer();\n"
-                  << std::flush;
+    logInfo() << "Quaternion::QContainer::~QContainer();\n" << std::flush;
 }
 
 Quaternion::QContainer& Quaternion::QContainer::operator=(const QContainer& cnt)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "Quaterinon::QContainer::operator="
-                     "(const QContainer& cnt);\n"
-                  << std::flush;
+    logInfo() << "Quaterinon::QContainer::operator=(const QContainer& cnt);\n"
+        << std::flush;
     a_val = cnt.a_val;
     b_val = cnt.b_val;
     c_val = cnt.c_val;
@@ -94,57 +87,46 @@ Quaternion::QContainer& Quaternion::QContainer::operator=(const QContainer& cnt)
 
 Quaternion::QContainer* Quaternion::QContainer::clone() const
 {
-    if(DEBUG_LEVEL > 3)
-        std::cerr << "(II) "
-                     "Quaternion::QContainer* "
-                     "Quaternion::QContainer::clone();\n"
-                  << std::flush;
+    logInfo() << "Quaternion::QContainer* Quaternion::QContainer::clone();\n"
+        << std::flush;
     return new QContainer(*this);
 }
 
-/* `QContainer` getter. */
 Real Quaternion::QContainer::getA() const
 {
     return a_val;
 }
 
-/* `QContainer` getter. */
 Real Quaternion::QContainer::getB() const
 {
     return b_val;
 }
 
-/* `QContainer` getter. */
 Real Quaternion::QContainer::getC() const
 {
     return c_val;
 }
 
-/* `QContainer` getter. */
 Real Quaternion::QContainer::getD() const
 {
     return d_val;
 }
 
-/* `QContainer` setter. */
 void Quaternion::QContainer::setA(Real a)
 {
     a_val = a;
 }
 
-/* `QContainer` setter. */
 void Quaternion::QContainer::setB(Real b)
 {
     b_val = b;
 }
 
-/* `QContainer` setter. */
 void Quaternion::QContainer::setC(Real c)
 {
     c_val = c;
 }
 
-/* `QContainer` setter. */
 void Quaternion::QContainer::setD(Real d)
 {
     d_val = d;
@@ -154,28 +136,21 @@ void Quaternion::QContainer::setD(Real d)
 Quaternion::Quaternion(IQContainer* cnt)
     : val(cnt)
 {
-    if(DEBUG_LEVEL > 3)
-        std::cerr << "(II) "
-                     "Quaternion::Quaternion"
-                     "(IQContainer* cnt);\n"
-                  << std::flush;
+    logInfo() << "Quaternion::Quaternion (IQContainer* cnt);\n" << std::flush;
 }
 
 /* Creates `zero` quaternion (0, 0, 0, 0). */
 Quaternion::Quaternion()
     : val(new Quaternion::QContainer(0., 0., 0., 0.))
 {
-    if(DEBUG_LEVEL > 3)
-        std::cerr << "(II) Quaternion::Quaternion();\n" << std::flush;
+    logInfo() << "Quaternion::Quaternion();\n" << std::flush;
 }
 
 /* Creates real quaternion (a, 0, 0, 0). */
 Quaternion::Quaternion(Real a)
   : val(new Quaternion::QContainer(a, 0., 0., 0.))
 {
-    if(DEBUG_LEVEL > 3)
-        std::cerr << "(II) Quaternion::Quaternion(" << a << ");\n"
-                  << std::flush;
+    logInfo() << "Quaternion::Quaternion(Real a);\n" << std::flush;
 }
 
 /* Creates quaternion which behaves like complex number
@@ -183,92 +158,67 @@ Quaternion::Quaternion(Real a)
 Quaternion::Quaternion(Real a, Real b)
   : val(new Quaternion::QContainer(a, b, 0., 0.))
 {
-    if(DEBUG_LEVEL > 3)
-        std::cerr << "(II) Quaternion::Quaternion("
-                  << a << ", " << b << ");\n" << std::flush;
+    logInfo() << "Quaternion::Quaternion(Real a, Real b);\n" << std::flush;
 }
 
 /* Creates common quaternion (a, b, c, d). */
 Quaternion::Quaternion(Real a, Real b, Real c, Real d)
   : val(new Quaternion::QContainer(a, b, c, d))
 {
-    if(DEBUG_LEVEL > 3)
-        std::cerr << "(II) Quaternion::Quaternion("
-                  << a << ", " << b << ", "
-                  << c << ", " << d << ");\n" << std::flush;
+    logInfo() << "Quaternion::Quaternion(Real a, Real b, Real c, Real d);\n"
+        << std::flush;
 }
 
 /* Creates copy of quaternion `q`. */
 Quaternion::Quaternion(const Quaternion& q)
   : val(q.val->clone())
 {
-    if(DEBUG_LEVEL > 3)
-        std::cerr << "(II) Quaternion::Quaternion(const Quaternion&);\n"
-                     "\tCalled with: " << q << ".\n" << std::flush;
+    logInfo() << "Quaternion::Quaternion(const Quaternion&);\n"
+        "\tCalled with: " << q << ".\n" << std::flush;
 }
 
 /* Destructor. */
 Quaternion::~Quaternion()
 {
-    if(DEBUG_LEVEL > 3)
-        std::cerr << "(II) Quaternion::~Quaternion();\n" << std::flush;
+    logInfo() << "Quaternion::~Quaternion();\n" << std::flush;
     delete val;
 }
 
 /* Returns quaternion's first coordinate. */
 Real Quaternion::r() const
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::r();\n"
-                     "\tReturns " << val->getA() << ".\n" << std::flush;
     return val->getA();
 }
 
 /* Returns quaternion's second coordinate. */
 Real Quaternion::i() const {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::i();\n"
-                     "\tReturns " << val->getB() << ".\n" << std::flush;
     return val->getB();
 }
 
 /* Returns quaternion's third coordinate. */
 Real Quaternion::j() const {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::j();\n"
-                     "\tReturns " << val->getC() << ".\n" << std::flush;
     return val->getC();
 }
 
 /* Returns quaternion's fourth coordinate. */
 Real Quaternion::k() const
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::k();\n"
-                     "\tReturns " << val->getD() << ".\n" << std::flush;
     return val->getD();
 }
 
 /* Assigns given quaternion to `self`. */
 Quaternion& Quaternion::operator=(const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::operator=(const Quaternion&);\n"
-                     "\tLeft:  " << *this << ";\n"
-                     "\tRight: " << q << ".\n" << std::flush;
-    if(this == &q) {
-        if(DEBUG_LEVEL == 3)
-            std::cerr << "(II) Quaternion::operator=(const Quaternion&);\n"
-                         "\tLeft:  " << *this << ";\n"
-                         "\tRight: " << q << ".\n";
-        if(DEBUG_LEVEL > 2)
-            std::cerr << "(WW)\tRequested self-assignment.\n" << std::flush;
-    }
-    else { /* this != &q: */
+    logInfo() << "Quaternion::operator=(const Quaternion&);\n"
+        "\tLeft:  " << *this << ";\n"
+        "\tRight: " << q << ".\n"
+        << std::flush;
+    if(this == &q)
+        logWarn() << "Requested self-assignment.\n" << std::flush;
+    else {
         delete val;
         val = q.val->clone();
     }
-
     return *this;
 }
 
@@ -276,9 +226,9 @@ Quaternion& Quaternion::operator=(const Quaternion& q)
  * (a, b, c, d) -> (-a, -b, -c, -d). */
 Quaternion Quaternion::operator-() const
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::operator-() const;\n" << std::flush;
-    return Quaternion(-val->getA(), -val->getB(), -val->getC(), -val->getD());
+    logInfo() << "Quaternion::operator-() const;\n" << std::flush;
+    return Quaternion
+        (-(val->getA()), -(val->getB()), -(val->getC()), -(val->getD()));
 }
 
 /* Add and assign:
@@ -286,17 +236,14 @@ Quaternion Quaternion::operator-() const
  * self(self.a + q.a, self.b + q.b, self.c + q.c, self.d + q.d). */
 Quaternion& Quaternion::operator+=(const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::operator+=(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                     "\tSelf: " << *this << " (before assignment).\n";
+    logInfo() "Quaternion::operator+=(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n"
+        "\tSelf: " << *this << " (before assignment).\n" << std::flush;
     val->setA(val->getA() + q.val->getA());
     val->setB(val->getB() + q.val->getB());
     val->setC(val->getC() + q.val->getC());
     val->setD(val->getD() + q.val->getD());
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "\tSelf: " << *this << " (after assignment).\n"
-                  << std::flush;
+    logInfo() << "\tSelf: " << *this << " (after assignment).\n" << std::flush;
     return *this;
 }
 
@@ -305,17 +252,13 @@ Quaternion& Quaternion::operator+=(const Quaternion& q)
  * self(self.a - q.a, self.b - q.b, self.c - q.c, self.d - q.d). */
 Quaternion& Quaternion::operator-=(const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::operator-=(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                     "\tSelf: " << *this << " (before assignment).\n";
+    logInfo() << "Quaternion::operator-=(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n"
+        "\tSelf: " << *this << " (before assignment).\n" << std::flush;
     val->setA(val->getA() - q.val->getA());
     val->setB(val->getB() - q.val->getB());
     val->setC(val->getC() - q.val->getC());
     val->setD(val->getD() - q.val->getD());
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "\tSelf: " << *this << " (after assignment).\n"
-                  << std::flush;
     return *this;
 }
 
@@ -327,10 +270,9 @@ Quaternion& Quaternion::operator-=(const Quaternion& q)
  *      self.a * q.d + self.b * q.c - self.c * q.b + self.d * q.a) */
 Quaternion& Quaternion::operator*=(const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::operator*=(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                     "\tSelf: " << *this << " (before assignment).\n";
+    logInfo() << "Quaternion::operator*=(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n"
+        "\tSelf: " << *this << " (before assignment).\n" << std::flush;
     Real a = val->getA();
     Real b = val->getB();
     Real c = val->getC();
@@ -343,9 +285,6 @@ Quaternion& Quaternion::operator*=(const Quaternion& q)
     val->setB(a * q_b_val + b * q_a_val + c * q_d_val - d * q_c_val);
     val->setC(a * q_c_val - b * q_d_val + c * q_a_val + d * q_b_val);
     val->setD(a * q_d_val + b * q_c_val - c * q_b_val + d * q_a_val);
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "\tSelf: " << *this << " (after assignment).\n"
-                  << std::flush;
     return *this;
 }
 
@@ -355,17 +294,13 @@ Quaternion& Quaternion::operator*=(const Quaternion& q)
 Quaternion& Quaternion::operator/=(const Quaternion& q)
     throw (DivideByZeroException)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::operator/=(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                     "\tSelf: " << *this << " (before assignment).\n";
+    logInfo() << "Quaternion::operator/=(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n"
+        "\tSelf: " << *this << " (before assignment).\n";
     if(!q)
         throw DivideByZeroException();
     *this *= ::conj(q);
     *this /= ::det(q);
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "\tSelf: " << *this << " (after assignment).\n"
-                  << std::flush;
     return *this;
 }
 
@@ -373,14 +308,10 @@ Quaternion& Quaternion::operator/=(const Quaternion& q)
  * self(a, b, c, d) += r -> self(a + r, b, c, d); */
 Quaternion& Quaternion::operator+=(const Real& r)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::operator+=(const Real& r);\n"
-                     "\tCalled with: " << r << ".\n"
-                     "\tSelf: " << *this << " (before assignment).\n";
+    logInfo() << "Quaternion::operator+=(const Real& r);\n"
+        "\tCalled with: " << r << ".\n"
+        "\tSelf: " << *this << " (before assignment).\n";
     val->setA(val->getA() + r);
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "\tSelf: " << *this << " (after assignment).\n"
-                  << std::flush;
     return *this;
 }
 
@@ -388,14 +319,10 @@ Quaternion& Quaternion::operator+=(const Real& r)
  * self(a, b, c, d) -= r -> self(a - r, b, c, d); */
 Quaternion& Quaternion::operator-=(const Real& r)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::operator-=(const Real& r);\n"
-                     "\tCalled with: " << r << ".\n"
-                     "\tSelf: " << *this << " (before assignment).\n";
+    logInfo() << "Quaternion::operator-=(const Real& r);\n"
+        "\tCalled with: " << r << ".\n"
+        "\tSelf: " << *this << " (before assignment).\n";
     val->setA(val->getA() - r);
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "\tSelf: " << *this << " (after assignment).\n"
-                  << std::flush;
     return *this;
 }
 
@@ -403,17 +330,13 @@ Quaternion& Quaternion::operator-=(const Real& r)
  * self(a, b, c, d) *= r -> self(r * a, r * b, r * c, r * d); */
 Quaternion& Quaternion::operator*=(const Real& r)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::operator*=(const Real& r);\n"
-                     "\tCalled with: " << r << ".\n"
-                     "\tSelf: " << *this << " (before assignment).\n";
+    logInfo << "Quaternion::operator*=(const Real& r);\n"
+        "\tCalled with: " << r << ".\n"
+        "\tSelf: " << *this << " (before assignment).\n";
     val->setA(val->getA() * r);
     val->setB(val->getB() * r);
     val->setC(val->getC() * r);
     val->setD(val->getD() * r);
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "\tSelf: " << *this << " (after assignment).\n"
-                  << std::flush;
     return *this;
 }
 
@@ -422,19 +345,15 @@ Quaternion& Quaternion::operator*=(const Real& r)
 Quaternion& Quaternion::operator/=(const Real& r)
     throw (DivideByZeroException)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::operator/=(const Real& r);\n"
-                     "\tCalled with: " << r << ".\n"
-                     "\tSelf: " << *this << " (before assignment).\n";
+    logInfo() << "Quaternion::operator/=(const Real& r);\n"
+        "\tCalled with: " << r << ".\n"
+        "\tSelf: " << *this << " (before assignment).\n";
     if(r == RZERO)
         throw DivideByZeroException();
     val->setA(val->getA() / r);
     val->setB(val->getB() / r);
     val->setC(val->getC() / r);
     val->setD(val->getD() / r);
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "\tSelf: " << *this << " (after assignment).\n"
-                  << std::flush;
     return *this;
 }
 
@@ -445,10 +364,6 @@ Quaternion& Quaternion::operator/=(const Real& r)
 Quaternion::operator bool() const
 {
     static const Quaternion zero = Quaternion(RZERO, RZERO, RZERO, RZERO);
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::operator bool() const;\n"
-                     "\tSelf: " << *this << "\n."
-                  << std::flush;
     return !(*this == zero);
 }
 
@@ -456,10 +371,6 @@ Quaternion::operator bool() const
  * Returns `false` if and only if given `Quaternion` casts itself to `true`. */
 bool Quaternion::operator!() const {
     static const Quaternion zero = Quaternion(RZERO, RZERO, RZERO, RZERO);
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) Quaternion::operator!() const;\n"
-                     "\tSelf: " << *this << "\n."
-                  << std::flush;
     return (*this == zero);
 }
 
@@ -468,12 +379,9 @@ bool Quaternion::operator!() const {
  * (self.a + q.a, self.b + q.b, self.c + q.c, self.d + q.d). */
 const Quaternion operator+(const Quaternion& p, const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator+(const Quaternion& p, const Quaternion& q);\n"
-                     "\tCalled with (p): " << p << ",\n"
-                     "\tCalled with (q): " << q << ".\n"
-                  << std::flush;
+    logInfo() << "operator+(const Quaternion& p, const Quaternion& q);\n"
+        "\tCalled with (p): " << p << ",\n"
+        "\tCalled with (q): " << q << ".\n" << std::flush;
     return Quaternion(p) += q;
 }
 
@@ -482,12 +390,9 @@ const Quaternion operator+(const Quaternion& p, const Quaternion& q)
  * (self.a - q.a, self.b - q.b, self.c - q.c, self.d - q.d). */
 const Quaternion operator-(const Quaternion& p, const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator-(const Quaternion& p, const Quaternion& q);\n"
-                     "\tCalled with (p): " << p << ",\n"
-                     "\tCalled with (q): " << q << ".\n"
-                  << std::flush;
+    logInfo() << "operator-(const Quaternion& p, const Quaternion& q);\n"
+        "\tCalled with (p): " << p << ",\n"
+        "\tCalled with (q): " << q << ".\n" << std::flush;
     return Quaternion(p) -= q;
 }
 
@@ -499,12 +404,9 @@ const Quaternion operator-(const Quaternion& p, const Quaternion& q)
  *  self.a * q.d + self.b * q.c - self.c * q.b + self.d * q.a) */
 const Quaternion operator*(const Quaternion& p, const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator*(const Quaternion& p, const Quaternion& q);\n"
-                     "\tCalled with (p): " << p << ",\n"
-                     "\tCalled with (q): " << q << ".\n"
-                  << std::flush;
+    logInfo() << "operator*(const Quaternion& p, const Quaternion& q);\n"
+        "\tCalled with (p): " << p << ",\n"
+        "\tCalled with (q): " << q << ".\n" << std::flush;
     return Quaternion(p) *= q;
 }
 
@@ -514,12 +416,9 @@ const Quaternion operator*(const Quaternion& p, const Quaternion& q)
 const Quaternion operator/(const Quaternion& p, const Quaternion& q)
     throw (DivideByZeroException)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator/(const Quaternion& p, const Quaternion& q);\n"
-                     "\tCalled with (p): " << p << ",\n"
-                     "\tCallew with (q): " << q << ".\n"
-                  << std::flush;
+    logInfo() << "operator/(const Quaternion& p, const Quaternion& q);\n"
+        "\tCalled with (p): " << p << ",\n"
+        "\tCallew with (q): " << q << ".\n" << std::flush;
     return Quaternion(p) /= q;
 }
 
@@ -527,12 +426,9 @@ const Quaternion operator/(const Quaternion& p, const Quaternion& q)
  * self(a, b, c, d) + r -> (a + r, b, c, d); */
 const Quaternion operator+(const Quaternion& q, const Real& r)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator+(const Quaternion& q, const Real& r);\n"
-                     "\tCalled with (q): " << q << ",\n"
-                     "\tCalled with (r): " << r << ".\n"
-                  << std::flush;
+    logInfo() << "operator+(const Quaternion& q, const Real& r);\n"
+        "\tCalled with (q): " << q << ",\n"
+        "\tCalled with (r): " << r << ".\n" << std::flush;
     return Quaternion(q) += r;
 }
 
@@ -540,12 +436,9 @@ const Quaternion operator+(const Quaternion& q, const Real& r)
  * self(a, b, c, d) + r -> (a + r, b, c, d); */
 const Quaternion operator+(const Real& r, const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator+(const Real& r, const Quaternion& q);\n"
-                     "\tCalled with (r): " << r << ",\n"
-                     "\tCalled with (q): " << q << ".\n"
-                  << std::flush;
+    logInfo() << "operator+(const Real& r, const Quaternion& q);\n"
+        "\tCalled with (r): " << r << ",\n"
+        "\tCalled with (q): " << q << ".\n" << std::flush;
     return Quaternion(q) += r;
 }
 
@@ -553,12 +446,9 @@ const Quaternion operator+(const Real& r, const Quaternion& q)
  * self(a, b, c, d) - r -> (a - r, b, c, d); */
 const Quaternion operator-(const Quaternion& q, const Real& r)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator-(const Quaternion& q, const Real& r);\n"
-                     "\tCalled with (q): " << q << ",\n"
-                     "\tCalled with (r): " << r << ".\n"
-                  << std::flush;
+    logInfo() << "operator-(const Quaternion& q, const Real& r);\n"
+        "\tCalled with (q): " << q << ",\n"
+        "\tCalled with (r): " << r << ".\n" << std::flush;
     return Quaternion(q) -= r;
 }
 
@@ -566,12 +456,9 @@ const Quaternion operator-(const Quaternion& q, const Real& r)
  * self(a, b, c, d) - r -> (a - r, b, c, d); */
 const Quaternion operator-(const Real& r, const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator+(const Real& r, const Quaternion& q);\n"
-                     "\tCalled with (r): " << r << ",\n"
-                     "\tCalled with (q): " << q << ".\n"
-                  << std::flush;
+    logInfo() << "operator+(const Real& r, const Quaternion& q);\n"
+        "\tCalled with (r): " << r << ",\n"
+        "\tCalled with (q): " << q << ".\n" << std::flush;
     return (-q) += r;
 }
 
@@ -579,12 +466,9 @@ const Quaternion operator-(const Real& r, const Quaternion& q)
  * self(a, b, c, d) * r -> (r * a, r * b, r * c, r * d); */
 const Quaternion operator*(const Quaternion& q, const Real& r)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator*(const Quaternion& q, const Real& r);\n"
-                     "\tCalled with (q): " << q << ",\n"
-                     "\tCalled with (r): " << r << ".\n"
-                  << std::flush;
+    logInfo() << "operator*(const Quaternion& q, const Real& r);\n"
+        "\tCalled with (q): " << q << ",\n"
+        "\tCalled with (r): " << r << ".\n" << std::flush;
     return Quaternion(q) *= r;
 }
 
@@ -592,12 +476,9 @@ const Quaternion operator*(const Quaternion& q, const Real& r)
  * self(a, b, c, d) * r -> (r * a, r * b, r * c, r * d); */
 const Quaternion operator*(const Real& r, const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator+(const Real& r, const Quaternion& q);\n"
-                     "\tCalled with (r): " << r << ",\n"
-                     "\tCalled with (q): " << q << ".\n"
-                  << std::flush;
+    logInfo() << "operator+(const Real& r, const Quaternion& q);\n"
+        "\tCalled with (r): " << r << ",\n"
+        "\tCalled with (q): " << q << ".\n" << std::flush;
     return Quaternion(q) *= r;
 }
 
@@ -606,12 +487,9 @@ const Quaternion operator*(const Real& r, const Quaternion& q)
 const Quaternion operator/(const Quaternion& q, const Real& r)
     throw (DivideByZeroException)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator/(const Quaternion& q, const Real& r);\n"
-                     "\tCalled with (q): " << q << ",\n"
-                     "\tCalled with (r): " << r << ".\n"
-                  << std::flush;
+    logInfo() << "operator/(const Quaternion& q, const Real& r);\n"
+        "\tCalled with (q): " << q << ",\n"
+        "\tCalled with (r): " << r << ".\n" << std::flush;
     return Quaternion(q) /= r;
 }
 
@@ -620,12 +498,9 @@ const Quaternion operator/(const Quaternion& q, const Real& r)
 const Quaternion operator/(const Real& r, const Quaternion& q)
     throw (DivideByZeroException)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator+(const Real& r, const Quaternion& q);\n"
-                     "\tCalled with (r): " << r << ",\n"
-                     "\tCalled with (q): " << q << ".\n"
-                  << std::flush;
+    logInfo() << "operator+(const Real& r, const Quaternion& q);\n"
+        "\tCalled with (r): " << r << ",\n"
+        "\tCalled with (q): " << q << ".\n" << std::flush;
     return reciprocal(q) *= r;
 }
 
@@ -637,12 +512,9 @@ const Quaternion operator/(const Real& r, const Quaternion& q)
  * self.d == q.d. */
 bool operator==(const Quaternion& p, const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator==(const Quaternion& p, const Quaternion& q);\n"
-                     "\tCalled with (`p`): " << p << ",\n"
-                     "\tCalled with (`q`): " << q << ".\n"
-                  << std::flush;
+    logInfo() << "operator==(const Quaternion& p, const Quaternion& q);\n"
+        "\tCalled with (`p`): " << p << ",\n"
+        "\tCalled with (`q`): " << q << ".\n" << std::flush;
     return (p.val->getA() == q.val->getA()) &&
            (p.val->getB() == q.val->getB()) &&
            (p.val->getC() == q.val->getC()) &&
@@ -657,12 +529,9 @@ bool operator==(const Quaternion& p, const Quaternion& q)
  * self.d != q.d. */
 bool operator!=(const Quaternion& p, const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "operator!=(const Quaternion& p, const Quaternion& q);\n"
-                     "\tCalled with (`p`): " << p << ",\n"
-                     "\tCalled with (`q`): " << q << ".\n"
-                  << std::flush;
+    logInfo() << "operator!=(const Quaternion& p, const Quaternion& q);\n"
+        "\tCalled with (`p`): " << p << ",\n"
+        "\tCalled with (`q`): " << q << ".\n" << std::flush;
     return !(p == q);
 }
 
@@ -673,13 +542,6 @@ std::ostream& operator<<(std::ostream& os, const Quaternion& q)
     Real b_val = q.val->getB();
     Real c_val = q.val->getC();
     Real d_val = q.val->getD();
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "ostream& operator<<(ostream& os, const Quaternion& q);\n"
-                     "\tCalled with: "
-                  << a_val << " + " << b_val << "i + "
-                  << c_val << "j + " << d_val << "k.\n"
-                  << std::flush;
     os << a_val << " + "
        << b_val << "i + "
        << c_val << "j + "
@@ -691,10 +553,8 @@ std::ostream& operator<<(std::ostream& os, const Quaternion& q)
  * (a, _, _, _) -> (a, 0, 0, 0). */
 Quaternion re(const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) re(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                  << std::flush;
+    logInfo() << "re(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n" << std::flush;
     return Quaternion(q.r());
 }
 
@@ -702,10 +562,8 @@ Quaternion re(const Quaternion& q)
  * (_, b, c, d) -> (0, b, c, d). */
 Quaternion im(const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) im(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                  << std::flush;
+    logInfo() << "im(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n" << std::flush;
     return Quaternion(RZERO, q.i(), q.j(), q.k());
 }
 
@@ -713,10 +571,8 @@ Quaternion im(const Quaternion& q)
  * (a, b, c, d) -> (a, -b, -c, -d). */
 Quaternion conj(const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) conj(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                  << std::flush;
+    logInfo() << "conj(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n" << std::flush;
     return Quaternion(q.r(), -q.i(), -q.j(), -q.k());
 }
 
@@ -726,10 +582,8 @@ Quaternion conj(const Quaternion& q)
  * where ||.|| is `norm` declared below. */
 Quaternion unit(const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) unit(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                  << std::flush;
+    logInfo() << "unit(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n" << std::flush;
     return q ? Quaternion(q) /= det(q) : q;
 }
 
@@ -737,10 +591,8 @@ Quaternion unit(const Quaternion& q)
  * (a, b, c, d) -> a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2. */
 Real det(const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) det(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                  << std::flush;
+    logInfo() << "det(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n" << std::flush;
     Real a = q.r();
     Real b = q.i();
     Real c = q.j();
@@ -752,10 +604,8 @@ Real det(const Quaternion& q)
  * (a, b, c, d) -> (a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2) ^ 0.5. */
 Real norm(const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) norm(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                  << std::flush;
+    logInfo() << "norm(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n" << std::flush;
     return sqrt(det(q));
 }
 
@@ -765,10 +615,8 @@ Real norm(const Quaternion& q)
 Quaternion reciprocal(const Quaternion& q)
     throw (DivideByZeroException)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) conj(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                  << std::flush;
+    logInfo() << "conj(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n" << std::flush;
     if(!q)
         throw DivideByZeroException();
     return Quaternion(q.r(), -q.i(), -q.j(), -q.k()) /= det(q);
@@ -778,17 +626,13 @@ Quaternion reciprocal(const Quaternion& q)
  * (0, i1, j1, k1) . (0, i2, j2, k2) -> i1 * i2 + j1 * j2 + k1 * k2. */
 Real dotProd(const Quaternion& p, const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "dotProd(const Quaternion& p, const Quaternion& q);\n"
-                     "\tCalled with (`p`): " << p << ",\n"
-                     "\tCalled with (`q`): " << q << ".\n"
-                  << std::flush;
-    if(DEBUG_LEVEL > 2)
-        if(p.r() == RZERO)
-            std::cerr << "(WW)\t`p` is not pure imaginary!\n" << std::flush;
-        if(q.r() == RZERO)
-            std::cerr << "(WW)\t`q` is not pure imaginary!\n" << std::flush;
+    logInfo() << "dotProd(const Quaternion& p, const Quaternion& q);\n"
+        "\tCalled with (`p`): " << p << ",\n"
+        "\tCalled with (`q`): " << q << ".\n" << std::flush;
+    if(p.r() == RZERO)
+        logWarn() << "`p` is not pure imaginary!\n" << std::flush;
+    if(q.r() == RZERO)
+        logWarn() << "`q` is not pure imaginary!\n" << std::flush;
     return (p.i() * q.i()) + (p.j() * q.j()) + (p.k() * q.k());
 }
 
@@ -797,17 +641,13 @@ Real dotProd(const Quaternion& p, const Quaternion& q)
  * (0, c1 * d2 - d1 * c2, d1 * b2 - b1 * d2, b1 * c2 - c1 * b2) */
 Quaternion crossProd(const Quaternion& p, const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) "
-                     "crossProd(const Quaternion& p, const Quaternion& q);\n"
-                     "\tCalled with (`p`): " << p << ",\n"
-                     "\tCalled with (`q`): " << q << ".\n"
-                  << std::flush;
-    if(DEBUG_LEVEL > 2)
-        if(p.r() == RZERO)
-            std::cerr << "(WW)\t`p` is not pure imaginary!\n" << std::flush;
-        if(q.r() == RZERO)
-            std::cerr << "(WW)\t`q` is not pure imaginary!\n" << std::flush;
+    logInfo() << "crossProd(const Quaternion& p, const Quaternion& q);\n"
+        "\tCalled with (`p`): " << p << ",\n"
+        "\tCalled with (`q`): " << q << ".\n" << std::flush;
+    if(p.r() == RZERO)
+        logWarn() << "`p` is not pure imaginary!\n" << std::flush;
+    if(q.r() == RZERO)
+        logWarn() << "`q` is not pure imaginary!\n" << std::flush;
     /* `p`: */
     Real b1 = p.i();
     Real c1 = p.j();
@@ -828,10 +668,8 @@ Quaternion crossProd(const Quaternion& p, const Quaternion& q)
  * and `Uv` is unit of `v` (Uv = unit(v)). */
 Quaternion exp(const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) exp(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                  << std::flush;
+    logInfo() << "exp(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n" << std::flush;
     Quaternion v = im(q);
     Quaternion uv = unit(v);
     Real norm_v = norm(v);
@@ -844,10 +682,8 @@ Quaternion exp(const Quaternion& q)
  * and `Uv` is unit of `v` (Uv = unit(v)). */
 Quaternion log(const Quaternion& q)
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) ln(const Quaternion& q);\n"
-                     "\tCalled with: " << q << ".\n"
-                  << std::flush;
+    logInfo() << "ln(const Quaternion& q);\n"
+        "\tCalled with: " << q << ".\n" << std::flush;
     Quaternion v = im(q);
     Quaternion uv = unit(q);
     Real norm_q = norm(q);
@@ -857,24 +693,18 @@ Quaternion log(const Quaternion& q)
 /* Returns `i` quaternion (0, 1, 0, 0). */
 Quaternion I()
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) I().\n" << std::flush;
     return Quaternion(RZERO, RONE, RZERO, RZERO);
 }
 
 /* Returns `j` quaternion (0, 0, 1, 0). */
 Quaternion J()
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) J().\n" << std::flush;
     return Quaternion(RZERO, RZERO, RONE, RZERO);
 }
 
 /* Returns `k` quaternion (0, 0, 0, 1). */
 Quaternion K()
 {
-    if(DEBUG_LEVEL > 4)
-        std::cerr << "(II) K().\n" << std::flush;
     return Quaternion(RZERO, RZERO, RZERO, RONE);
 }
 
