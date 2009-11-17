@@ -236,7 +236,7 @@ Quaternion Quaternion::operator-() const
  * self(self.a + q.a, self.b + q.b, self.c + q.c, self.d + q.d). */
 Quaternion& Quaternion::operator+=(const Quaternion& q)
 {
-    logInfo() "Quaternion::operator+=(const Quaternion& q);\n"
+    logInfo() << "Quaternion::operator+=(const Quaternion& q);\n"
         "\tCalled with: " << q << ".\n"
         "\tSelf: " << *this << " (before assignment).\n" << std::flush;
     val->setA(val->getA() + q.val->getA());
@@ -330,7 +330,7 @@ Quaternion& Quaternion::operator-=(const Real& r)
  * self(a, b, c, d) *= r -> self(r * a, r * b, r * c, r * d); */
 Quaternion& Quaternion::operator*=(const Real& r)
 {
-    logInfo << "Quaternion::operator*=(const Real& r);\n"
+    logInfo() << "Quaternion::operator*=(const Real& r);\n"
         "\tCalled with: " << r << ".\n"
         "\tSelf: " << *this << " (before assignment).\n";
     val->setA(val->getA() * r);
