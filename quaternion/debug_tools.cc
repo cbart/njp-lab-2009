@@ -1,19 +1,10 @@
 #include <iostream>
-#include <string>
 
 #include "./debug_tools.h"
 
 DiagStream::DiagStream(DebugLevel min_debug_lv)
     : MIN_DEBUG_LEVEL(min_debug_lv)
 {
-}
-
-template<typename T>
-DiagStream& operator<<(DiagStream& ds, const T& message)
-{
-    if(DEBUG_LEVEL >= ds.MIN_DEBUG_LEVEL)
-        std::cerr << message;
-    return ds;
 }
 
 DiagStream& operator<<

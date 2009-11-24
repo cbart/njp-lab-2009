@@ -136,7 +136,7 @@ void Quaternion::QContainer::setD(Real d)
 Quaternion::Quaternion(IQContainer* cnt)
     : val(cnt)
 {
-    logInfo() << "Quaternion::Quaternion (IQContainer* cnt);\n" << std::flush;
+    logInfo() << "Quaternion::Quaternion(IQContainer* cnt);\n" << std::flush;
 }
 
 /* Creates `zero` quaternion (0, 0, 0, 0). */
@@ -216,8 +216,10 @@ Quaternion& Quaternion::operator=(const Quaternion& q)
     if(this == &q)
         logWarn() << "Requested self-assignment.\n" << std::flush;
     else {
-        delete val;
-        val = q.val->clone();
+        val->setA(q.val->getA());
+        val->setB(q.val->getB());
+        val->setC(q.val->getC());
+        val->setD(q.val->getD());
     }
     return *this;
 }
@@ -363,7 +365,7 @@ Quaternion& Quaternion::operator/=(const Real& r)
  * `self` is `true` in all other cases. */
 Boolean Quaternion::booleanTest() const
 {
-    return r() != RZERO || i() != RZERO || j() != RZERO || k() != RZERO;
+    return (r() != RZERO) || (i() != RZERO) || (j() != RZERO) || (k() != RZERO);
 }
 
 /* Add:
@@ -493,7 +495,7 @@ const Quaternion operator/(const Real& r, const Quaternion& q)
     logInfo() << "operator+(const Real& r, const Quaternion& q);\n"
         "\tCalled with (r): " << r << ",\n"
         "\tCalled with (q): " << q << ".\n" << std::flush;
-    return reciprocal(q) *= r;
+    return reciprocal(q) * r;
 }
 
 /* Are same?
@@ -502,15 +504,31 @@ const Quaternion operator/(const Real& r, const Quaternion& q)
  * self.b == q.b AND
  * self.c == q.c AND
  * self.d == q.d. */
+inline bool equal(Real a, Real b) {
+    static const Real EPSILON = 0.000000001;
+    return (a - b < EPSILON) && (-EPSILON < a - b);
+}
 bool operator==(const Quaternion& p, const Quaternion& q)
 {
+
     logInfo() << "operator==(const Quaternion& p, const Quaternion& q);\n"
         "\tCalled with (`p`): " << p << ",\n"
         "\tCalled with (`q`): " << q << ".\n" << std::flush;
-    return (p.val->getA() == q.val->getA()) &&
-           (p.val->getB() == q.val->getB()) &&
-           (p.val->getC() == q.val->getC()) &&
-           (p.val->getD() == q.val->getD());
+    //if((p.val->getA() == q.val->getA()) &&
+           //(p.val->getB() == q.val->getB()) &&
+           //(p.val->getC() == q.val->getC()) &&
+           //(p.val->getD() == q.val->getD()))
+        //logInfo() << "-> equal.\n" << std::flush;
+    //else
+        //logInfo() << "-> not equal.\n" << std::flush;
+    //return (p.val->getA() == q.val->getA()) &&
+           //(p.val->getB() == q.val->getB()) &&
+           //(p.val->getC() == q.val->getC()) &&
+           //(p.val->getD() == q.val->getD());
+    return (equal(p.val->getA(), q.val->getA()) &&
+        equal(p.val->getB(), q.val->getB()) &&
+        equal(p.val->getC(), q.val->getC()) &&
+        equal(p.val->getD(), q.val->getD()));
 }
 
 /* Are not same?
@@ -543,7 +561,7 @@ std::ostream& operator<<(std::ostream& os, const Quaternion& q)
 
 /* Returns real (scalar part) of `q` quaternion; that means:
  * (a, _, _, _) -> (a, 0, 0, 0). */
-Quaternion re(const Quaternion& q)
+const Quaternion re(const Quaternion& q)
 {
     logInfo() << "re(const Quaternion& q);\n"
         "\tCalled with: " << q << ".\n" << std::flush;
@@ -552,7 +570,7 @@ Quaternion re(const Quaternion& q)
 
 /* Returns pure imaginary (vector part) of `q` quaternion; that means:
  * (_, b, c, d) -> (0, b, c, d). */
-Quaternion im(const Quaternion& q)
+const Quaternion im(const Quaternion& q)
 {
     logInfo() << "im(const Quaternion& q);\n"
         "\tCalled with: " << q << ".\n" << std::flush;
@@ -561,7 +579,7 @@ Quaternion im(const Quaternion& q)
 
 /* Returns conjugated quaternion `q`:
  * (a, b, c, d) -> (a, -b, -c, -d). */
-Quaternion conj(const Quaternion& q)
+const Quaternion conj(const Quaternion& q)
 {
     logInfo() << "conj(const Quaternion& q);\n"
         "\tCalled with: " << q << ".\n" << std::flush;
@@ -572,7 +590,7 @@ Quaternion conj(const Quaternion& q)
  * q(a, b, c, d) -> (a / ||q||, b / ||q||, c / ||q||, d / ||q||)
  * or (0., 0., 0., 0.) if q == (0., 0., 0., 0.)
  * where ||.|| is `norm` declared below. */
-Quaternion unit(const Quaternion& q)
+const Quaternion unit(const Quaternion& q)
 {
     logInfo() << "unit(const Quaternion& q);\n"
         "\tCalled with: " << q << ".\n" << std::flush;
@@ -581,7 +599,7 @@ Quaternion unit(const Quaternion& q)
 
 /* Returns determinant of given quaternion:
  * (a, b, c, d) -> a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2. */
-Real det(const Quaternion& q)
+const Real det(const Quaternion& q)
 {
     logInfo() << "det(const Quaternion& q);\n"
         "\tCalled with: " << q << ".\n" << std::flush;
@@ -594,7 +612,7 @@ Real det(const Quaternion& q)
 
 /* Returns norm of quaternion `q`:
  * (a, b, c, d) -> (a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2) ^ 0.5. */
-Real norm(const Quaternion& q)
+const Real norm(const Quaternion& q)
 {
     logInfo() << "norm(const Quaternion& q);\n"
         "\tCalled with: " << q << ".\n" << std::flush;
@@ -604,7 +622,7 @@ Real norm(const Quaternion& q)
 /* Returns reciprocal of a quaternion `q`:
  * q -> 1/q, that is:
  * q(a, b, c, d) -> (a, -b, -c, -d) / ||q||. */
-Quaternion reciprocal(const Quaternion& q)
+const Quaternion reciprocal(const Quaternion& q)
     throw (DivideByZeroException)
 {
     logInfo() << "conj(const Quaternion& q);\n"
@@ -616,7 +634,7 @@ Quaternion reciprocal(const Quaternion& q)
 
 /* Returns dot product of given imaginary quaternions:
  * (0, i1, j1, k1) . (0, i2, j2, k2) -> i1 * i2 + j1 * j2 + k1 * k2. */
-Real dotProd(const Quaternion& p, const Quaternion& q)
+const Real dotProd(const Quaternion& p, const Quaternion& q)
 {
     logInfo() << "dotProd(const Quaternion& p, const Quaternion& q);\n"
         "\tCalled with (`p`): " << p << ",\n"
@@ -631,7 +649,7 @@ Real dotProd(const Quaternion& p, const Quaternion& q)
 /* Returns cross product of given imaginary quaternions:
  * (0, b1, c1, d1) x (0, b2, c2, d2) ->
  * (0, c1 * d2 - d1 * c2, d1 * b2 - b1 * d2, b1 * c2 - c1 * b2) */
-Quaternion crossProd(const Quaternion& p, const Quaternion& q)
+const Quaternion crossProd(const Quaternion& p, const Quaternion& q)
 {
     logInfo() << "crossProd(const Quaternion& p, const Quaternion& q);\n"
         "\tCalled with (`p`): " << p << ",\n"
@@ -658,7 +676,7 @@ Quaternion crossProd(const Quaternion& p, const Quaternion& q)
  * exp(q) = (e ^ a) * (cos||v|| + Uv * sin||v||),
  * where `v` is pure imaginary of `q` (v = im(q)),
  * and `Uv` is unit of `v` (Uv = unit(v)). */
-Quaternion exp(const Quaternion& q)
+const Quaternion exp(const Quaternion& q)
 {
     logInfo() << "exp(const Quaternion& q);\n"
         "\tCalled with: " << q << ".\n" << std::flush;
@@ -672,7 +690,7 @@ Quaternion exp(const Quaternion& q)
  * log(q) = ln||q|| + Uv * arccos(a / ||q||),
  * where `v` is pure imaginary of `q` (v = im(q)),
  * and `Uv` is unit of `v` (Uv = unit(v)). */
-Quaternion log(const Quaternion& q)
+const Quaternion log(const Quaternion& q)
 {
     logInfo() << "ln(const Quaternion& q);\n"
         "\tCalled with: " << q << ".\n" << std::flush;
@@ -682,7 +700,7 @@ Quaternion log(const Quaternion& q)
     return log(norm_q) + uv * acos(q.r() / norm_q);
 }
 
-Quaternion pow(const Quaternion& q, UInteger i)
+const Quaternion pow(const Quaternion& q, UInteger i)
 {
     if(i == 0)
         return Quaternion(RONE);
@@ -703,19 +721,19 @@ Quaternion pow(const Quaternion& q, UInteger i)
 }
 
 /* Returns `i` quaternion (0, 1, 0, 0). */
-Quaternion I()
+const Quaternion I()
 {
     return Quaternion(RZERO, RONE, RZERO, RZERO);
 }
 
 /* Returns `j` quaternion (0, 0, 1, 0). */
-Quaternion J()
+const Quaternion J()
 {
     return Quaternion(RZERO, RZERO, RONE, RZERO);
 }
 
 /* Returns `k` quaternion (0, 0, 0, 1). */
-Quaternion K()
+const Quaternion K()
 {
     return Quaternion(RZERO, RZERO, RZERO, RONE);
 }

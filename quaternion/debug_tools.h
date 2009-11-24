@@ -2,7 +2,6 @@
 #define _DEBUG_TOOLS_H_
 
 #include <iostream>
-#include <string>
 
 typedef unsigned long DebugLevel;
 typedef std::string String;
@@ -39,7 +38,19 @@ class DiagStream
          * like std::flush, std::endl, etc... */
         friend DiagStream& operator<<
             (DiagStream& ds, std::ostream& (*message_fun)(std::ostream&));
+
 };
+
+template<typename T>
+DiagStream& operator<<(DiagStream& ds, const T& message)
+{
+    if(DEBUG_LEVEL >= ds.MIN_DEBUG_LEVEL)
+        std::cerr << message;
+    return ds;
+}
+
+DiagStream& operator<<
+(DiagStream& ds, std::ostream&(*message_fun)(std::ostream&));
 
 /** Returns stream for error logging. */
 DiagStream& logErr();

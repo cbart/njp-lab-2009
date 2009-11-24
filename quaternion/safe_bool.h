@@ -46,18 +46,8 @@ class SafeBool<void> : private SafeBoolBase
     public:
 
         operator bool_type() const;
-        //{
-            //return booleanTest() ?
-                //&SafeBoolBase::noComparisonSupport : 0;
-            //SafeBoolBase::noComparisonSupport();
-        //}
+
 };
-
-template<typename T>
-Boolean operator==(const SafeBool<T>& lhs, Boolean b);
-
-template<typename T>
-Boolean operator==(Boolean b, const SafeBool<T>& rhs);
 
 template<typename T, typename U>
 void operator==(const SafeBool<T>& lhs, const SafeBool<U>& rhs);

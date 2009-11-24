@@ -19,40 +19,6 @@ SafeBool<void>::operator bool_type() const
     SafeBoolBase::noComparisonSupport();
 }
 
-template<typename T>
-Boolean operator==(const SafeBool<T>& lhs, Boolean b)
-{
-    if(b) {
-        if(lhs)
-            return true;
-        else
-            return false;
-    }
-    else {
-        if(lhs)
-            return false;
-        else
-            return true;
-    }
-}
-
-template<typename T>
-Boolean operator==(Boolean b, const SafeBool<T>& rhs)
-{
-    if(b) {
-        if(rhs)
-            return true;
-        else
-            return false;
-    }
-    else {
-        if(rhs)
-            return false;
-        else
-            return true;
-    }
-}
-
 template<typename T, typename U>
 void operator==(const SafeBool<T>& lhs, const SafeBool<U>& rhs)
 {

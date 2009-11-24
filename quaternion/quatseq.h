@@ -6,8 +6,10 @@
 #include <map>
 #include <vector>
 #include "./quaternion.h"
+#include "./debug_tools.h"
+#include "./safe_bool.h"
 
-class QuaternionSequence {
+class QuaternionSequence : public SafeBool<> {
     /** Sequences of quaternions. */
 
     public:
@@ -31,15 +33,15 @@ class QuaternionSequence {
 
                  ProxyQContainer& operator=(const ProxyQContainer& cnt);
                  virtual ~ProxyQContainer();
-                 ProxyQContainer* clone() const; /* @Override */
-                 Real getA() const;              /* @Override */
-                 Real getB() const;              /* @Override */
-                 Real getC() const;              /* @Override */
-                 Real getD() const;              /* @Override */
-                 void setA(Real a);              /* @Override */
-                 void setB(Real b);              /* @Override */
-                 void setC(Real c);              /* @Override */
-                 void setD(Real d);              /* @Override */
+                 virtual ProxyQContainer* clone() const; /* @Override */
+                 virtual Real getA() const;              /* @Override */
+                 virtual Real getB() const;              /* @Override */
+                 virtual Real getC() const;              /* @Override */
+                 virtual Real getD() const;              /* @Override */
+                 virtual void setA(Real a);              /* @Override */
+                 virtual void setB(Real b);              /* @Override */
+                 virtual void setC(Real c);              /* @Override */
+                 virtual void setD(Real d);              /* @Override */
 
         };
 
@@ -57,18 +59,21 @@ class QuaternionSequence {
         /* Copies `Quaternion` `q` to index `id`. */
         Quaternion& setQuaternion(size_type id, const Quaternion& q);
 
+        /* Test for if(QuaternionSequence); */
+        Boolean booleanTest() const;
+
     public:
 
         /** Creates sequence which all elements are 0. */
         QuaternionSequence();
 
         /** Creates sequence which elements are defined in given `map`. */
-        QuaternionSequence
+        explicit QuaternionSequence
             (const std::map<size_type, Quaternion>& m_seq);
 
         /** Creates sequence which first elements
          *  are defined in given `vector`. */
-        QuaternionSequence(const std::vector<Quaternion>& v_seq);
+        explicit QuaternionSequence(const std::vector<Quaternion>& v_seq);
 
         /** Creates a copy of given `QuaternionSequence` `qs`. */
         QuaternionSequence(const QuaternionSequence& qs);
@@ -136,6 +141,17 @@ class QuaternionSequence {
         friend const QuaternionSequence operator/
             (const QuaternionSequence& qs, const Quaternion& q);
 
+        /** Indicates if two quaternion sequences are equal. */
+        friend Boolean operator==
+            (const QuaternionSequence& qs1, const QuaternionSequence& qs2);
+
+        /** Indicates whether two quaternion sequences vary. */
+        friend Boolean operator!=
+            (const QuaternionSequence& qs1, const QuaternionSequence& qs2);
+
+        /** Printing the sequence. */
+        friend std::ostream& operator<<
+            (std::ostream& os, const QuaternionSequence& qs);
 };
 
 #endif
