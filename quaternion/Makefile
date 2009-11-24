@@ -1,10 +1,10 @@
 CXX := g++
 CXXFLAGS := -Wall -g -D DEBUGLEVEL=2
 
-all: quatsec.o quaternion.o debug_tools.o
+all: quatseq.o quaternion.o debug_tools.o
 
-quatsec.o: quatsec.h quatsec.cc quaternion.o
-	${CXX} ${CXXFLAGS} -c quatsec.cc -o quatsec.o
+quatseq.o: quatseq.h quatseq.cc quaternion.o
+	${CXX} ${CXXFLAGS} -c quatseq.cc -o quatseq.o
 
 quaternion.o: quaternion.h quaternion.cc safe_bool.o
 	${CXX} ${CXXFLAGS} -c quaternion.cc -o quaternion.o
