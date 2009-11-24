@@ -3,8 +3,10 @@
 
 #include <iostream>
 #include <stdexcept>
+#include "./safe_bool.h"
 
 typedef double Real;
+typedef unsigned long UInteger;
 
 const Real RZERO = 0.0;
 
@@ -28,6 +30,8 @@ class DivideByZeroException : public std::runtime_error {
  *   * use boost abstract templates to check if we have all needed operators.
  */
 
+class QuaternionSequence;
+
 /* `QContainer` interface. */
 class IQContainer {
 
@@ -47,10 +51,12 @@ class IQContainer {
 
 };
 
-class Quaternion {
+class Quaternion : public SafeBool<> {
     /** Signature of a class implementing quaternions. */
 
-    friend class QuaternionSequence;
+    public:
+
+        friend class ::QuaternionSequence;
 
     protected:
 
@@ -87,6 +93,11 @@ class Quaternion {
 
         /* Creates `Quaternion` with given `IQContainer`. */
         Quaternion(IQContainer* cnt);
+
+        /* Bool testing.
+         * `self` is `false` if and only if `self` == (0, 0, 0, 0).
+         * `self` is `true` in all other cases. */
+        Boolean booleanTest() const; /* @Override; */
 
     public:
 
@@ -168,16 +179,6 @@ class Quaternion {
          * self(a, b, c, d) /= r -> self(a / r, b / r, c / r, d / r); */
         Quaternion& operator/=(const Real& r)
             throw (DivideByZeroException);
-
-        /* Bool casting.
-         * `self` is `false` if and only if `self` == (0, 0, 0, 0).
-         * `self` is `true` in all other cases. */
-        operator bool() const;
-
-        /* Upside down bool casting.
-         * !`self` is `false` if and only if `self` != (0, 0, 0, 0).
-         * !`self` is `true` in the other case (when `self` = (0, 0, 0, 0). */
-        bool operator!() const;
 
         /* Add:
          * self(a, b, c, d) + q(a, b, c, d) ->
@@ -302,13 +303,16 @@ Quaternion exp(const Quaternion& q);
  * and `Uv` is unit of `v` (Uv = unit(v)). */
 Quaternion log(const Quaternion& q);
 
-/* Returns `i` quaternion (0, 1, 0, 0). */
+/* Natural power of a quaternion. */
+Quaternion pow(const Quaternion& q, UInteger i);
+
+/* Returns `i` quaternion (0., 1., 0., 0.). */
 Quaternion I();
 
-/* Returns `j` quaternion (0, 0, 1, 0). */
+/* Returns `j` quaternion (0., 0., 1., 0.). */
 Quaternion J();
 
-/* Returns `k` quaternion (0, 0, 0, 1). */
+/* Returns `k` quaternion (0., 0., 0., 1.). */
 Quaternion K();
 
 #endif

@@ -358,20 +358,12 @@ Quaternion& Quaternion::operator/=(const Real& r)
 }
 
 
-/* Bool casting.
+/* Bool testing.
  * `self` is `false` if and only if `self` == (0, 0, 0, 0).
  * `self` is `true` in all other cases. */
-Quaternion::operator bool() const
+Boolean Quaternion::booleanTest() const
 {
-    static const Quaternion zero = Quaternion(RZERO, RZERO, RZERO, RZERO);
-    return !(*this == zero);
-}
-
-/* Boolean negation.
- * Returns `false` if and only if given `Quaternion` casts itself to `true`. */
-bool Quaternion::operator!() const {
-    static const Quaternion zero = Quaternion(RZERO, RZERO, RZERO, RZERO);
-    return (*this == zero);
+    return r() != RZERO || i() != RZERO || j() != RZERO || k() != RZERO;
 }
 
 /* Add:
@@ -688,6 +680,26 @@ Quaternion log(const Quaternion& q)
     Quaternion uv = unit(q);
     Real norm_q = norm(q);
     return log(norm_q) + uv * acos(q.r() / norm_q);
+}
+
+Quaternion pow(const Quaternion& q, UInteger i)
+{
+    if(i == 0)
+        return Quaternion(RONE);
+    UInteger power = i - 1;
+    Quaternion q_pow = Quaternion(q);
+    /* niezmiennik: pow(q,i) = q_pow * q ^ power; */
+    while(power > 0) {
+        if(power % 2 == 0) {
+            q_pow *= q_pow;
+            power /= 2;
+        }
+        else {
+            q_pow *= q;
+            power -= 1;
+        }
+    }
+    return q_pow;
 }
 
 /* Returns `i` quaternion (0, 1, 0, 0). */

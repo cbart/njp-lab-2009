@@ -16,7 +16,11 @@ class QuaternionSequence {
 
         class ProxyQContainer : public IQContainer {
 
-             protected:
+            public:
+
+                friend class QuaternionSequence;
+
+            protected:
 
                  size_type index;
                  QuaternionSequence* qs;
@@ -94,9 +98,9 @@ class QuaternionSequence {
         /** Returns quaternion of index `id`. */
         const Quaternion& operator[](size_type id) const;
 
-        /** Raturns non const quaternion of index `id`.
+        /** Returns non const quaternion of index `id`.
          *  Used for assignment. */
-        Quaternion& operator[](size_type id);
+        Quaternion operator[](size_type id);
 
         /** Treats this quaternion sequence as a power series
          *  and calculates value in `q`. */

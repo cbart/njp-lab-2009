@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <map>
+#include <deque>
 
 #include "./debug_tools.h"
 #include "./quatsec.h"
@@ -191,38 +192,179 @@ QuaternionSequence::QuaternionSequence
 
 QuaternionSequence::~QuaternionSequence()
 {
-    logInfo() << "QuaternionSequence::~QuaternionSequence();" << std::flush;
+    logInfo() << "QuaternionSequence::~QuaternionSequence();\n" << std::flush;
 }
 
+QuaternionSequence& QuaternionSequence::operator=
+(const QuaternionSequence& qs)
+{
+    logInfo() << "QuaternionSequence& QuaternionSequence::operator="
+        "(const QuaternionSequence& qs);\n" << std::flush;
+    seq = qs.seq;
+    return *this;
+}
 
+QuaternionSequence& QuaternionSequence::operator+=
+(const QuaternionSequence& qs)
+{
+    logInfo() << "QuaternionSequence& QuaternionSequence::operator+="
+        "(const QuaternionSequence& qs);\n" << std::flush;
+    for(std::map<size_type, Quaternion>::const_iterator i = qs.seq.begin();
+            i != qs.seq.end();
+            i ++) {
+        std::map<size_type, Quaternion>::iterator finder = seq.find(i->first);
+        if(finder != seq.end())
+            seq[i->first] += i->second;
+        else
+            seq[i->first] = i->second;
+    }
+    return *this;
+}
 
+QuaternionSequence& QuaternionSequence::operator-=
+(const QuaternionSequence& qs)
+{
+    logInfo() << "QuaternionSequence& QuaternionSequence::operator-="
+        "(const QuaternionSequence& qs);\n" << std::flush;
+    for(std::map<size_type, Quaternion>::const_iterator i = qs.seq.begin();
+            i != qs.seq.end();
+            i ++) {
+        std::map<size_type, Quaternion>::iterator finder = seq.find(i->first);
+        if(finder != seq.end())
+            seq[i->first] -= i->second;
+        else
+            seq[i->first] = -(i->second);
+    }
+    return *this;
+}
 
+QuaternionSequence& QuaternionSequence::operator*=
+(const Quaternion& q)
+{
+    logInfo() << "QuaternionSequence& QuaternionSequence::operator*="
+        "(const Quaternion& q);\n" << std::flush;
+    for(std::map<size_type, Quaternion>::iterator i = seq.begin();
+            i != seq.end();
+            i ++) {
+        seq[i->first] *= q;
+    }
+    return *this;
+}
 
+QuaternionSequence& QuaternionSequence::operator/=
+(const Quaternion& q)
+    throw (DivideByZeroException)
+{
+    logInfo() << "QuaternionSequence& QuaternionSequence::operator/="
+        "(const Quaternion& q);\n" << std::flush;
+    for(std::map<size_type, Quaternion>::iterator i = seq.begin();
+            i != seq.end();
+            i ++) {
+        seq[i->first] /= q;
+    }
+    return *this;
+}
 
+QuaternionSequence& QuaternionSequence::operator*=
+(const QuaternionSequence& qs)
+{
+    logInfo() << "QuaternionSequence& QuaternionSequence::operator*="
+        "(const QuaternionSequence& qs);\n" << std::flush;
+    std::map<size_type, Quaternion>::const_iterator qs_iter = qs.seq.begin();
+    std::map<size_type, Quaternion>::iterator self_iter = seq.begin();
+    std::deque<size_type> to_erase = std::deque<size_type>();
+    while(qs_iter != qs.seq.end() && self_iter != seq.end()) {
+        size_type self_pos = self_iter->first;
+        size_type qs_pos = qs_iter->first;
+        if(self_pos < qs_pos) {
+            to_erase.push_back(self_pos);
+            self_iter ++;
+        }
+        else if(self_pos == qs_pos) {
+            seq[self_pos] *= qs_iter->second;
+            self_iter ++;
+            qs_iter ++;
+        }
+        else { /* if self_pos > qs_pos */
+            qs_iter ++;
+        }
+    }
+    while(self_iter != seq.end()) {
+        to_erase.push_back(self_iter->first);
+        self_iter ++;
+    }
+    while(!to_erase.empty()) {
+        seq.erase(to_erase.front());
+        to_erase.pop_front();
+    }
+    return *this;
+}
 
+const Quaternion& QuaternionSequence::operator[](size_type id) const
+{
+    static Quaternion zero_quat = Quaternion();
+    logInfo() << "const Quaternion& QuaternionSequence::operator[]"
+        "(QuaternionSequence::size_type id) const;\n" << std::flush;
+    std::map<size_type, Quaternion>::const_iterator iter = seq.find(id);
+    if(iter != seq.end())
+        return iter->second;
+    else
+        return zero_quat;
+}
 
+Quaternion QuaternionSequence::operator[](size_type id)
+{
+    logInfo() << "Quaternion QuaternionSequence::operator[]"
+        "(QuaternionSequence::size_type id);\n" << std::flush;
+    return Quaternion(new ProxyQContainer(id, *this));
+}
 
+const Quaternion QuaternionSequence::operator()(const Quaternion& q) const
+{
+    logInfo() << "Quaternion QuaternionSequence::operator[]"
+        "(const Quaternion& q) const;\n" << std::flush;
+    Quaternion sum = Quaternion();
+    std::map<size_type, Quaternion>::const_reverse_iterator iter = seq.rbegin();
+   //TODO: schemat Hornera
+    while(iter != seq.rend()) {
+        sum += (iter->second * pow(q, iter->first));
+    }
+    return sum;
+}
 
+const QuaternionSequence operator+
+(const QuaternionSequence& qs1, const QuaternionSequence& qs2)
+{
+    return QuaternionSequence(qs1) += qs2;
+}
 
+const QuaternionSequence operator-
+(const QuaternionSequence& qs1, const QuaternionSequence& qs2)
+{
+    return QuaternionSequence(qs1) -= qs2;
+}
 
+const QuaternionSequence operator*
+(const QuaternionSequence& qs1, const QuaternionSequence& qs2)
+{
+    return QuaternionSequence(qs1) *= qs2;
+}
 
+const QuaternionSequence operator*
+(const QuaternionSequence& qs, const Quaternion& q)
+{
+    return QuaternionSequence(qs) *= q;
+}
 
+const QuaternionSequence operator*
+(const Quaternion& q, const QuaternionSequence& qs)
+{
+    //TODO: mnożenie z lewej strony...
+    return QuaternionSequence();
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+const QuaternionSequence operator/
+(const QuaternionSequence& qs, const Quaternion& q)
+{
+    return QuaternionSequence(qs) /= q;
+}
