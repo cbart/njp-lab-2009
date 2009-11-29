@@ -1,31 +1,15 @@
 /** author: Cezary Bartoszuk <cbart@students.mimuw.edu.pl> *
- *    user: cb277617@students.mimuw.edu.pl                 */
+ *      id: cb277617@students.mimuw.edu.pl                 */
 
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
-#include "./debug_tools.h"
-#include "./quaternion.h"
+#include "debug_tools.h"
+#include "quaternion.h"
 
-/** DEBUGLEVEL:                         *
- *  0 - no debug;                       *
- *  1 - assertions ON;                  *
- *  2 - 1 and info, warnings, errors;   */
 /** To manage turning assertions On/Off
  *  you have to toggle -D NDEBUG option
  *  while compiling. */
-
-#ifdef DEBUGLEVEL
-    const DebugLevel DEBUG_LEVEL = DEBUGLEVEL;
-#else
-    const DebugLevel DEBUG_LEVEL = 0;
-#endif
-
-const String DIAG_PROG_NAME = "Quaternion";
-
-const DebugLevel ERROR_DEBUG_LEVEL = 2;
-const DebugLevel WARNING_DEBUG_LEVEL = 2;
-const DebugLevel INFO_DEBUG_LEVEL = 2;
 
 /* Exception raised when division by zero is encountered. */
 DivideByZeroException::DivideByZeroException()
@@ -363,7 +347,7 @@ Quaternion& Quaternion::operator/=(const Real& r)
 /* Bool testing.
  * `self` is `false` if and only if `self` == (0, 0, 0, 0).
  * `self` is `true` in all other cases. */
-Boolean Quaternion::booleanTest() const
+bool Quaternion::booleanTest() const
 {
     return (r() != RZERO) || (i() != RZERO) || (j() != RZERO) || (k() != RZERO);
 }
@@ -514,17 +498,6 @@ bool operator==(const Quaternion& p, const Quaternion& q)
     logInfo() << "operator==(const Quaternion& p, const Quaternion& q);\n"
         "\tCalled with (`p`): " << p << ",\n"
         "\tCalled with (`q`): " << q << ".\n" << std::flush;
-    //if((p.val->getA() == q.val->getA()) &&
-           //(p.val->getB() == q.val->getB()) &&
-           //(p.val->getC() == q.val->getC()) &&
-           //(p.val->getD() == q.val->getD()))
-        //logInfo() << "-> equal.\n" << std::flush;
-    //else
-        //logInfo() << "-> not equal.\n" << std::flush;
-    //return (p.val->getA() == q.val->getA()) &&
-           //(p.val->getB() == q.val->getB()) &&
-           //(p.val->getC() == q.val->getC()) &&
-           //(p.val->getD() == q.val->getD());
     return (equal(p.val->getA(), q.val->getA()) &&
         equal(p.val->getB(), q.val->getB()) &&
         equal(p.val->getC(), q.val->getC()) &&

@@ -1,3 +1,7 @@
+/** Quaternion Sequences.                                  *
+ * author: Cezary Bartoszuk <cbart@students.mimuw.edu.pl>  *
+ *     id: cb277617@students.mimuw.edu.pl                  */
+
 #ifndef _QUATSEC_H_
 #define _QUATSEC_H_
 
@@ -5,9 +9,10 @@
 #include <stdexcept>
 #include <map>
 #include <vector>
-#include "./quaternion.h"
-#include "./debug_tools.h"
-#include "./safe_bool.h"
+
+#include "quaternion.h"
+#include "debug_tools.h"
+#include "safe_bool.h"
 
 class QuaternionSequence : public SafeBool<> {
     /** Sequences of quaternions. */
@@ -60,7 +65,7 @@ class QuaternionSequence : public SafeBool<> {
         Quaternion& setQuaternion(size_type id, const Quaternion& q);
 
         /* Test for if(QuaternionSequence); */
-        Boolean booleanTest() const;
+        bool booleanTest() const;
 
     public:
 
@@ -142,11 +147,11 @@ class QuaternionSequence : public SafeBool<> {
             (const QuaternionSequence& qs, const Quaternion& q);
 
         /** Indicates if two quaternion sequences are equal. */
-        friend Boolean operator==
+        friend bool operator==
             (const QuaternionSequence& qs1, const QuaternionSequence& qs2);
 
         /** Indicates whether two quaternion sequences vary. */
-        friend Boolean operator!=
+        friend bool operator!=
             (const QuaternionSequence& qs1, const QuaternionSequence& qs2);
 
         /** Printing the sequence. */

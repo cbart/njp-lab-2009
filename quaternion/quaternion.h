@@ -1,10 +1,14 @@
+/** Quaternion.                                            *
+ * author: Cezary Bartoszuk <cbart@students.mimuw.edu.pl>  *
+ *     id: cb277617@students.mimuw.edu.pl                  */
+
 #ifndef _QUATERNION_H_
 #define _QUATERNION_H_
 
 #include <iostream>
 #include <stdexcept>
-#include "./debug_tools.h"
-#include "./safe_bool.h"
+#include "debug_tools.h"
+#include "safe_bool.h"
 
 typedef double Real;
 typedef unsigned long UInteger;
@@ -22,12 +26,6 @@ class DivideByZeroException : public std::runtime_error {
 };
 
 /* TODO:
- *   * according to Rob Murray (in `C++ Strategies and Tactics`, 1993)
- *     all unary operators should are methods,
- *     =, (), [], ->, ->* MUST be methods,
- *     +=, -=, /=, *=, ^=, &=, |=, %=, >>=, <<= are methods,
- *     all the rest of binary operators are `friend` functions.
- *   -> check if we're OK
  *   * use boost abstract templates to check if we have all needed operators.
  */
 
@@ -97,10 +95,10 @@ class Quaternion : public SafeBool<> {
 
         IQContainer* val;
 
-       /* Bool testing.
+        /* Bool testing.
          * `self` is `false` if and only if `self` == (0, 0, 0, 0).
          * `self` is `true` in all other cases. */
-        Boolean booleanTest() const; /* @Override; */
+        bool booleanTest() const; /* @Override; */
 
     public:
 

@@ -1,12 +1,15 @@
+/** author: Cezary Bartoszuk <cbart@students.mimuw.edu.pl>  *
+ *      id: cb277617@students.mimuw.edu.pl                  */
+
 #include <iostream>
 #include <stdexcept>
 #include <map>
 #include <deque>
 
-#include "./debug_tools.h"
-#include "./quatseq.h"
-#include "./quaternion.h"
-#include "./safe_bool.h"
+#include "debug_tools.h"
+#include "quatseq.h"
+#include "quaternion.h"
+#include "safe_bool.h"
 
 typedef QuaternionSequence::ProxyQContainer ProxyQContainer;
 typedef QuaternionSequence::size_type size_type;
@@ -169,7 +172,7 @@ Quaternion& QuaternionSequence::setQuaternion
     return seq[id];
 }
 
-Boolean QuaternionSequence::booleanTest() const
+bool QuaternionSequence::booleanTest() const
 {
     for(std::map<size_type, Quaternion>::const_iterator iter = seq.begin();
             iter != seq.end();
@@ -405,7 +408,7 @@ const QuaternionSequence operator/
     return QuaternionSequence(qs) /= q;
 }
 
-Boolean operator==
+bool operator==
 (const QuaternionSequence& qs1, const QuaternionSequence& qs2)
 {
     if(qs1.seq.empty() && qs2.seq.empty())
@@ -425,7 +428,7 @@ Boolean operator==
     return true;
 }
 
-Boolean operator!=
+bool operator!=
 (const QuaternionSequence& qs1, const QuaternionSequence& qs2)
 {
     return !(qs1 == qs2);

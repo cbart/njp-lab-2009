@@ -1,0 +1,19 @@
+Quaternion Sequence module.
+
+1a. To compile modules without debugging support:
+    $ make
+
+1b. To compile modules with debugging support:
+    $ make debuglevel=1
+    to get assertions or
+    $ make debuglevel=2
+    to get debug messages and assertions.
+
+2. To recompile (for example to change debuglevel) firstly do the cleaning:
+    $ make clean
+
+3. To compile program using modules from this package:
+    $ g++ program.cpp quatseq.o quaternion.o safe_bool.o -o program
+
+4. To make lzma package:
+    $ make package

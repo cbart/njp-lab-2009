@@ -1,4 +1,8 @@
-#include "./safe_bool.h"
+/** Safe Boolean converter base class.                     *
+ * author: Cezary Bartoszuk <cbart@students.mimuw.edu.pl>  *
+ *     id: cb277617@students.mimuw.edu.pl                  */
+
+#include "safe_bool.h"
 
 SafeBoolBase& SafeBoolBase::operator=(const SafeBoolBase& sb)
 {
